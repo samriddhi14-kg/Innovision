@@ -2,7 +2,7 @@
 .logo-mark,
 .brand-mark {
   background-color: var(--lime, #b7e36f) !important;
-  background-image: url('../assets/khet-rakshak-logo.svg') !important;
+  background-image: url('../assets/khet-rakshak-logo.jpg') !important;
   background-position: center !important;
   background-size: cover !important;
   background-repeat: no-repeat !important;

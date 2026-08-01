@@ -40,7 +40,7 @@
   border-radius: 11px 11px 11px 3px;
   transform: rotate(-5deg);
   transition: transform 0.3s ease;
-  background-image: url('../assets/khet-rakshak-logo.svg');
+  background-image: url('../assets/khet-rakshak-logo.jpg');
   background-size: cover;
   background-position: center;
 }

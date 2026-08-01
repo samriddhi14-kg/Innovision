@@ -22,7 +22,7 @@
     .container { width:min(1160px,calc(100% - 48px)); margin:auto; }
     .topbar { padding:18px 0; background:rgba(246,250,243,.84); border-bottom:1px solid transparent; backdrop-filter:blur(14px); }
     .nav { display:flex; align-items:center; justify-content:space-between; gap:20px; }
-    .logo { display:flex; align-items:center; gap:10px; color:var(--deep); font-size:20px; font-weight:700; }
+    .logo { display:flex; align-items:center; gap:10px; color:var(--deep); font-size:20px; font-weight:700; text-transform:capitalize; }
     .logo-mark { display:grid; place-items:center; width:38px; height:38px; color:var(--deep); background:var(--lime); border-radius:11px 11px 11px 3px; transform:rotate(-5deg); }
     .logo-mark span { transform:rotate(5deg); font-size:20px; }
     .back-link { display:inline-flex; align-items:center; gap:7px; color:var(--muted); font-size:13px; font-weight:700; }
@@ -92,6 +92,7 @@
     .auth-header { padding:16px 0; background:rgba(255,255,255,.9); border-bottom:1px solid var(--line); box-shadow:0 4px 18px rgba(34,74,54,.05); }
     .auth-header .nav { min-height:48px; }
     .brand-lockup { display:flex; align-items:center; gap:11px; }
+    .site-logo { display:block; width:48px; height:48px; object-fit:cover; border-radius:14px; box-shadow:0 5px 14px rgba(34,74,54,.12); }
     .brand-copy { display:grid; gap:1px; }
     .brand-copy small { color:var(--muted); font-family:'DM Sans',sans-serif; font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
     .header-meta { display:flex; align-items:center; }
@@ -116,9 +117,10 @@
     .story-title { margin-top:22px; }
     .story-visual { background-image:linear-gradient(135deg,rgba(17,56,40,.08),rgba(17,56,40,.4)),url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1400&q=88'); background-size:cover; background-position:center; }
    .logo-mark .logo-symbol,.brand-mark .brand-symbol{display:block;width:21px;height:21px;transform:none;color:currentColor}</style>
+<link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
-  <header class="topbar auth-header"><nav class="nav container"><a class="brand-lockup" href="landingpage.html"><span class="logo-mark" aria-hidden="true"><svg class="logo-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span><span class="brand-copy"><strong class="logo">khetRakshak</strong><small>Smart farm protection</small></span></a><div class="header-meta"><a class="back-link" href="landingpage.html"><span aria-hidden="true">←</span> Back to home</a></div></nav></header>
+  <header class="topbar auth-header"><nav class="nav container"><a class="brand-lockup" href="landingpage.html"><img class="site-logo" src="assets/khet-rakshak-logo.svg" alt="KhetRakshak logo"><span class="brand-copy"><strong class="logo">KhetRakshak</strong><small>Smart farm protection</small></span></a><div class="header-meta"><a class="back-link" href="landingpage.html"><span aria-hidden="true">←</span> Back to home</a></div></nav></header>
   <main class="container">
     <div class="registration-view" id="registrationView">
       <div class="page-intro"><span class="eyebrow">Join khetRakshak</span><h1>Create Your khetRakshak Account</h1><p>Complete your details to get started.</p></div>

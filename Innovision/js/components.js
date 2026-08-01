@@ -7,7 +7,7 @@ function renderSidebar() {
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="landingpage.html">
         <span class="brand-mark" aria-hidden="true"><svg class="brand-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span>
-        <span>khetRakshak</span>
+        <span>KhetRakshak</span>
       </a>
       <nav class="sidebar-nav">
         <a class="nav-item ${currentPath === 'dashboard.html' ? 'active' : ''}" href="dashboard.html">

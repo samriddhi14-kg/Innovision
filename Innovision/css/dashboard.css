@@ -41,6 +41,14 @@
   transition: transform 0.3s ease;
 }
 
+.brand-mark .brand-symbol {
+  display: block;
+  width: 21px;
+  height: 21px;
+  transform: none;
+  color: currentColor;
+}
+
 .brand:hover .brand-mark {
   transform: rotate(0deg);
 }
@@ -110,7 +118,52 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.collapse-btn .collapse-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  color: var(--green-400);
+  background: rgba(134, 239, 172, 0.1);
+  border: 1px solid rgba(134, 239, 172, 0.28);
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.25s ease, background 0.2s ease;
+}
+
+.collapse-btn .collapse-icon::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(135deg);
+  margin-left: 3px;
+}
+
+.collapse-btn:hover .collapse-icon { background: rgba(134, 239, 172, 0.2); }
+.sidebar.collapsed .collapse-btn .collapse-icon { transform: rotate(180deg); }
+
 .sidebar.collapsed { width: 76px; }
+.sidebar.collapsed .brand-mark {
+  width: 48px;
+  height: 34px;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  transform: none;
+}
+.sidebar.collapsed .brand-mark .brand-symbol { display: none; }
+.sidebar.collapsed .brand-mark::after {
+  content: '';
+  display: block;
+  width: 22px;
+  height: 3px;
+  background: var(--green-400);
+  border-radius: 99px;
+  box-shadow: 0 0 10px rgba(134, 239, 172, 0.35);
+}
 .sidebar.collapsed .brand span:last-child,
 .sidebar.collapsed .nav-item span:last-child,
 .sidebar.collapsed .collapse-btn span:last-child { display: none; }

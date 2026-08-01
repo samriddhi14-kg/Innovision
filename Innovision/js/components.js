@@ -6,7 +6,7 @@ function renderSidebar() {
   const sidebarHTML = `
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="landingpage.html">
-        <span class="brand-mark"><span>⌁</span></span>
+        <span class="brand-mark" aria-hidden="true"><svg class="brand-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span>
         <span>khetRakshak</span>
       </a>
       <nav class="sidebar-nav">
@@ -17,7 +17,7 @@ function renderSidebar() {
           <i class="icon">◉</i><span>Live Monitoring</span>
         </a>
         <a class="nav-item ${currentPath === 'warning-light-status.html' ? 'active' : ''}" href="warning-light-status.html">
-          <i class="icon">◐</i><span>Warning Light</span>
+          <i class="icon">◐</i><span>Deterrent Light</span>
         </a>
         <a class="nav-item ${currentPath === 'speaker-status.html' ? 'active' : ''}" href="speaker-status.html">
           <i class="icon">◖</i><span>Speaker Status</span>
@@ -43,7 +43,7 @@ function renderSidebar() {
           <i class="icon">↪</i><span>Logout</span>
         </a>
         <button class="collapse-btn" id="collapseButton">
-          <i class="icon">‹</i><span>Collapse</span>
+          <i class="collapse-icon" aria-hidden="true"></i><span>Collapse</span>
         </button>
       </div>
     </aside>

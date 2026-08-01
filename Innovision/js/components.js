@@ -7,7 +7,7 @@ function renderSidebar() {
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="landingpage.html">
         <span class="brand-mark"><span>⌁</span></span>
-        <span>BMB</span>
+        <span>khetRakshak</span>
       </a>
       <nav class="sidebar-nav">
         <a class="nav-item ${currentPath === 'dashboard.html' ? 'active' : ''}" href="dashboard.html">

@@ -101,6 +101,12 @@
     .registration-view > .page-intro { display:none; }
     .story-title { margin-top:22px; }
     .story-visual { background-image:linear-gradient(135deg,rgba(17,56,40,.08),rgba(17,56,40,.4)),url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=88'); background-size:cover; background-position:center; }
+    .auth-divider { display:flex; align-items:center; gap:14px; margin:20px 0 16px; color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--line); }
+    .google-signin-btn { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; height:48px; margin-bottom:18px; background:var(--white); border:1px solid var(--line); border-radius:10px; color:var(--ink); font-size:14px; font-weight:600; box-shadow:0 2px 6px rgba(34,74,54,.04); transition:all .2s ease; cursor:pointer; }
+    .google-signin-btn:hover { background:#f8fbf7; border-color:#b5d4b8; box-shadow:0 4px 12px rgba(34,74,54,.08); transform:translateY(-1px); }
+    .google-signin-btn:active { transform:translateY(0); }
+    .google-signin-btn svg { flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -116,7 +122,7 @@
         <div><form class="form-card" id="registrationForm"><h2>Create Your khetRakshak Account</h2><p>Complete your details to get started.</p><h3 class="form-section-title">Tell us about you and your farm</h3><p>These details help our team prepare the right recommendation.</p>
           <fieldset><legend>Personal Information</legend><div class="form-grid"><div class="field"><label for="fullName">Full Name</label><input id="fullName" name="fullName" type="text" autocomplete="name" required></div><div class="field"><label for="mobile">Mobile Number</label><input id="mobile" name="mobile" type="tel" autocomplete="tel" required></div><div class="field full"><label for="email">Email Address</label><input id="email" name="email" type="email" autocomplete="email" required></div><div class="field"><label for="password">Password</label><input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required></div><div class="field"><label for="confirmPassword">Confirm Password</label><input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required></div></div></fieldset>
           <fieldset><legend>Farm Information</legend><div class="form-grid"><div class="field"><label for="farmName">Farm Name</label><input id="farmName" name="farmName" type="text" required></div><div class="field"><label for="district">District</label><select id="district" name="district" required><option value="">Select district</option><option>Achham</option><option>Chitwan</option><option>Dhading</option><option>Kaski</option><option>Kathmandu</option><option>Makwanpur</option><option>Nawalpur</option><option>Other</option></select></div><div class="field"><label for="municipality">Municipality</label><input id="municipality" name="municipality" type="text" required></div><div class="field"><label for="ward">Ward Number <span class="optional">(optional)</span></label><input id="ward" name="ward" type="text" inputmode="numeric"></div><div class="field full"><label for="address">Complete Farm Address</label><textarea id="address" name="address" required></textarea></div><div class="field"><label for="area">Approximate Farm Area</label><div class="area-row"><input id="area" name="area" type="number" min="0" step="any" required><select id="areaUnit" name="areaUnit" aria-label="Farm area unit"><option>Square Meters (m²)</option><option>Acres</option><option>Hectares</option></select></div></div><div class="field"><label for="crop">Main Crop Grown <span class="optional">(optional)</span></label><select id="crop" name="crop"><option value="">Select crop</option><option>Corn</option><option>Wheat</option><option>Rice</option><option>Vegetables</option><option>Fruits</option><option>Other</option></select></div></div></fieldset>
-          <label class="check-row"><input type="checkbox" id="terms" required><span>I agree to the <a href="#terms">Terms &amp; Conditions</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="submit-button" type="submit">Create My Account <span>→</span></button><p class="signin">Already have an account? <a href="login.html">Sign In</a></p>
+          <label class="check-row"><input type="checkbox" id="terms" required><span>I agree to the <a href="#terms">Terms &amp; Conditions</a> and <a href="#privacy">Privacy Policy</a>.</span></label><button class="submit-button" type="submit">Create My Account <span>→</span></button><div class="auth-divider"><span>OR</span></div><button class="google-signin-btn" id="googleSignUpBtn" type="button"><svg class="google-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg><span>Sign up with Google</span></button><p class="signin">Already have an account? <a href="login.html">Sign In</a></p>
         </form>
         <section class="help-card"><h3>Need Help Registering?</h3><p>Not comfortable creating an account online? No problem! Our team will help you through the entire process.</p><div class="help-actions"><a class="help-button" href="tel:+977XXXXXXXXXX">☎ Call Our Team</a><a class="help-button" href="mailto:support@khetRakshak.com?subject=Request%20a%20callback">✉ Request a Callback</a></div><p class="help-note">Our experts will help you create your account, assess your farm, recommend the right number of AI cameras and smart speakers, and schedule installation.</p></section></div>
       </div>
@@ -128,6 +134,7 @@
     const form = document.getElementById('registrationForm');
     const registrationView = document.getElementById('registrationView');
     const successView = document.getElementById('successView');
+    const googleSignUpBtn = document.getElementById('googleSignUpBtn');
     form.addEventListener('submit', event => {
       event.preventDefault();
       const password = document.getElementById('password');
@@ -138,11 +145,38 @@
         return;
       }
       confirmPassword.setCustomValidity('');
+
+      const nameVal = document.getElementById('fullName')?.value?.trim();
+      const emailVal = document.getElementById('email')?.value?.trim();
+      if (nameVal) localStorage.setItem('userName', nameVal);
+      if (emailVal) localStorage.setItem('userEmail', emailVal);
+
       registrationView.classList.add('hide');
       successView.classList.add('show');
       document.body.classList.add('success-mode');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+    if (googleSignUpBtn) {
+      googleSignUpBtn.addEventListener('click', () => {
+        const nameVal = document.getElementById('fullName')?.value?.trim();
+        const emailVal = document.getElementById('email')?.value?.trim();
+        if (nameVal) {
+          localStorage.setItem('userName', nameVal);
+        } else {
+          localStorage.setItem('userName', 'Google User');
+        }
+        if (emailVal) {
+          localStorage.setItem('userEmail', emailVal);
+        } else {
+          localStorage.setItem('userEmail', 'google.user@gmail.com');
+        }
+
+        registrationView.classList.add('hide');
+        successView.classList.add('show');
+        document.body.classList.add('success-mode');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
     document.getElementById('confirmPassword').addEventListener('input', event => event.target.setCustomValidity(''));
   </script>
 </body>

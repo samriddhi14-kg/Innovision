@@ -76,7 +76,7 @@ function renderTopbar(title) {
         </button>
         <div class="profile" id="profileButton">
           <span class="profile-text">
-            <strong>Welcome Back, Arjun Sharma!</strong>
+            <strong>Welcome Back, <span class="user-display-name">Arjun Sharma</span>!</strong>
             <span>Farm Owner</span>
           </span>
           <span class="avatar">AS</span>

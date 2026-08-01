@@ -9,16 +9,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --card-border: rgba(255, 255, 255, 0.1);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --danger: #ef4444;
-      --danger-hover: #dc2626;
-      --danger-light: rgba(239, 68, 68, 0.15);
+      --bg-color: #eef6eb;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: #dce9dd;
+      --text-main: #18332b;
+      --text-muted: #6c8178;
+      --primary: #317b58;
+      --primary-hover: #245d43;
+      --danger: #bf514b;
+      --danger-hover: #a53f3a;
+      --danger-light: #fff0ee;
     }
 
     * {
@@ -29,7 +29,7 @@
 
     body {
       font-family: 'Outfit', sans-serif;
-      background-color: var(--bg-color);
+      background: radial-gradient(circle at 15% 10%, #dcefdc 0, transparent 30%), var(--bg-color);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -92,7 +92,7 @@
       width: 100%;
       max-width: 440px;
       text-align: center;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 24px 60px rgba(34, 74, 54, 0.14);
       animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       opacity: 0;
       transform: translateY(20px);
@@ -123,7 +123,7 @@
       position: absolute;
       inset: -8px;
       border-radius: 50%;
-      border: 2px solid var(--danger-light);
+      border: 2px solid rgba(191, 81, 75, 0.18);
       animation: pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 
@@ -176,13 +176,13 @@
     .btn-logout {
       background-color: var(--danger);
       color: white;
-      box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+      box-shadow: 0 8px 18px rgba(191, 81, 75, 0.22);
     }
 
     .btn-logout:hover {
       background-color: var(--danger-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 10px 24px rgba(191, 81, 75, 0.28);
     }
 
     .btn-cancel {
@@ -192,8 +192,8 @@
     }
 
     .btn-cancel:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
+      background-color: #f6faf3;
+      border-color: #b9d7bd;
     }
 
     /* Loading Spinner */
@@ -222,6 +222,10 @@
       opacity: 0.8;
     }
 
+    .logout-brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:28px; color:#163c2d; font:700 20px/1.12 'Space Grotesk',sans-serif; }
+    .logo-mark { display:grid; place-items:center; width:38px; height:38px; color:#163c2d; background:#b7e36f; border-radius:11px 11px 11px 3px; transform:rotate(-5deg); }
+    .logo-symbol { transform:none; font:700 18px/1 'Space Grotesk',sans-serif; letter-spacing:-.04em; }
+
     @media (min-width: 480px) {
       .button-group {
         flex-direction: row;
@@ -230,7 +234,8 @@
         order: -1;
       }
     }
-  </style>
+   .logo-mark .logo-symbol,.brand-mark .brand-symbol{display:block;width:21px;height:21px;transform:none;color:currentColor}</style>
+<link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
 
@@ -239,6 +244,7 @@
   <div class="bg-shape shape-3"></div>
 
   <main class="modal-container">
+    <a class="logout-brand" href="landingpage.html"><span class="logo-mark" aria-hidden="true"><svg class="logo-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span><span>khetRakshak</span></a>
     <div class="icon-container">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

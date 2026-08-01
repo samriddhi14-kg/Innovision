@@ -27,6 +27,7 @@
   color: #fff;
   font-size: 20px;
   font-weight: 700;
+  text-transform: capitalize;
 }
 
 .brand-mark {
@@ -39,6 +40,18 @@
   border-radius: 11px 11px 11px 3px;
   transform: rotate(-5deg);
   transition: transform 0.3s ease;
+  background-image: url('../assets/khet-rakshak-logo.svg');
+  background-size: cover;
+  background-position: center;
+}
+
+.brand-mark .brand-symbol {
+  display: block;
+  width: 21px;
+  height: 21px;
+  transform: none;
+  color: currentColor;
+  opacity: 0;
 }
 
 .brand:hover .brand-mark {
@@ -62,6 +75,33 @@
   font-weight: 600;
   color: #a9c2b4;
   transition: var(--transition-smooth);
+}
+.sidebar .nav-item .icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  color: currentColor;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  font-size: 21px;
+  font-style: normal;
+  line-height: 1;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar .nav-item:hover .icon {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: scale(1.04);
+}
+
+.sidebar .nav-item.active .icon {
+  color: var(--deep);
+  background: rgba(255, 255, 255, 0.32);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .nav-item:hover {
@@ -110,7 +150,43 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.collapse-btn .collapse-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  color: var(--green-400);
+  background: rgba(134, 239, 172, 0.1);
+  border: 1px solid rgba(134, 239, 172, 0.28);
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.25s ease, background 0.2s ease;
+}
+
+.collapse-btn .collapse-icon::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(135deg);
+  margin-left: 3px;
+}
+
+.collapse-btn:hover .collapse-icon { background: rgba(134, 239, 172, 0.2); }
+.sidebar.collapsed .collapse-btn .collapse-icon { transform: rotate(180deg); }
+
 .sidebar.collapsed { width: 76px; }
+.sidebar.collapsed .brand-mark {
+  width: 44px;
+  height: 44px;
+  background: var(--green-400);
+  box-shadow: 0 0 0 4px rgba(134, 239, 172, 0.1), 0 8px 18px rgba(0, 0, 0, 0.14);
+  border-radius: 13px 13px 13px 4px;
+  transform: none;
+}
+.sidebar.collapsed .brand-mark .brand-symbol { display: block; width: 24px; height: 24px; }
 .sidebar.collapsed .brand span:last-child,
 .sidebar.collapsed .nav-item span:last-child,
 .sidebar.collapsed .collapse-btn span:last-child { display: none; }

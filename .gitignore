@@ -13,6 +13,10 @@ dist/
 prediction_log.txt
 /human-monkey/prediction_log.txt
 
+# Dataset & Model Artifacts
+/human-monkey/my_model
+/human-monkey/my_model/data/images
+**/my_model/data/images/
+
 # VS Code settings
 .vscode/
-/human-monkey/my_model

@@ -5416,3 +5416,55 @@ Model Summary: 314 layers, 36481772 parameters, 6194944 gradients, 103.2 GFLOPS
 [2026-08-02 15:23:38] Arduino << 0 (clear/no monkey)
 [2026-08-02 15:23:38] Audio alert stopped
 [2026-08-02 15:23:43] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:42:06] Loading YOLO model from: my_model\best.pt
+[2026-08-02 15:42:06] YOLO model loaded successfully.
+[2026-08-02 15:42:06] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-02 15:42:06] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-02 15:42:07] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-02 15:42:07] Windows MCI open code: 277
+[2026-08-02 15:42:07] Audio engine initialized in Beep mode.
+[2026-08-02 15:42:09] Arduino connected on COM9
+[2026-08-02 15:42:10] Webcam opened successfully
+[2026-08-02 15:42:10] Camera auto-started on boot.
+[2026-08-02 15:42:10] CameraThread running
+[2026-08-02 15:42:10] DetectionThread running
+[2026-08-02 15:42:10] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-02 15:42:13] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:43:58] Loading YOLO model from: my_model\best.pt
+[2026-08-02 15:43:58] YOLO model loaded successfully.
+[2026-08-02 15:43:58] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-02 15:43:58] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-02 15:43:58] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-02 15:43:58] Windows MCI open code: 277
+[2026-08-02 15:43:58] Audio engine initialized in Beep mode.
+[2026-08-02 15:44:00] Arduino connected on COM9
+[2026-08-02 15:44:01] Webcam opened successfully
+[2026-08-02 15:44:01] Camera auto-started on boot.
+[2026-08-02 15:44:01] CameraThread running
+[2026-08-02 15:44:01] DetectionThread running
+[2026-08-02 15:44:01] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-02 15:44:03] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:47:05] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:47:05] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:47:06] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.73)
+[2026-08-02 15:47:06] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:47:07] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:47:07] Audio alert stopped
+[2026-08-02 15:47:07] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:47:07] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:47:08] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.76)
+[2026-08-02 15:47:08] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:47:09] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:47:09] Audio alert stopped
+[2026-08-02 15:47:09] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:48:24] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:48:25] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:48:25] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.81)
+[2026-08-02 15:48:25] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:48:26] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:48:26] Audio alert stopped
+[2026-08-02 15:48:26] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:50:01] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:50:09] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:50:21] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:50:23] Monkey seen (Debouncing count=1/3)

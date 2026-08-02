@@ -5353,3 +5353,66 @@ Model Summary: 314 layers, 36481772 parameters, 6194944 gradients, 103.2 GFLOPS
 [2026-08-02 14:55:39] Audio alert stopped
 [2026-08-02 14:55:39] Monkey seen (Debouncing count=1/3)
 [2026-08-02 14:55:40] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:07:39] Loading YOLO model from: my_model\best.pt
+[2026-08-02 15:07:39] YOLO model loaded successfully.
+[2026-08-02 15:07:39] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-02 15:07:39] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-02 15:07:39] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-02 15:07:39] Windows MCI open code: 277
+[2026-08-02 15:07:39] Audio engine initialized in Beep mode.
+[2026-08-02 15:07:41] Arduino connected on COM9
+[2026-08-02 15:07:43] Webcam opened successfully
+[2026-08-02 15:07:43] Camera auto-started on boot.
+[2026-08-02 15:07:43] CameraThread running
+[2026-08-02 15:07:43] DetectionThread running
+[2026-08-02 15:07:43] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-02 15:07:45] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:08:41] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:08:41] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:08:50] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:09:09] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:09:09] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:09:09] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.46)
+[2026-08-02 15:09:09] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:09:10] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:09:10] Audio alert stopped
+[2026-08-02 15:09:11] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:09:37] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:09:39] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:10:21] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:10:22] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:12:10] Loading YOLO model from: my_model\best.pt
+[2026-08-02 15:12:11] YOLO model loaded successfully.
+[2026-08-02 15:12:11] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-02 15:12:11] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-02 15:12:11] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-02 15:12:11] Windows MCI open code: 277
+[2026-08-02 15:12:11] Audio engine initialized in Beep mode.
+[2026-08-02 15:12:13] Arduino connected on COM9
+[2026-08-02 15:12:15] Webcam opened successfully
+[2026-08-02 15:12:15] Camera auto-started on boot.
+[2026-08-02 15:12:15] CameraThread running
+[2026-08-02 15:12:15] DetectionThread running
+[2026-08-02 15:12:15] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-02 15:12:17] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:12:58] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:13:01] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:13:01] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:13:02] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:13:02] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.69)
+[2026-08-02 15:13:02] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:13:03] MONKEY ALERT CONFIRMED (Count=4/3, Conf=0.53)
+[2026-08-02 15:13:03] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:13:03] Audio alert stopped
+[2026-08-02 15:13:19] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:18:35] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:20:31] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:20:31] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:22:27] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:23:36] Monkey seen (Debouncing count=1/3)
+[2026-08-02 15:23:37] Monkey seen (Debouncing count=2/3)
+[2026-08-02 15:23:37] MONKEY ALERT CONFIRMED (Count=3/3, Conf=0.73)
+[2026-08-02 15:23:37] Arduino << 1 (MONKEY DETECTED)
+[2026-08-02 15:23:38] Arduino << 0 (clear/no monkey)
+[2026-08-02 15:23:38] Audio alert stopped
+[2026-08-02 15:23:43] Monkey seen (Debouncing count=1/3)

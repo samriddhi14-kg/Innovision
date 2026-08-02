@@ -123,9 +123,9 @@ async def get_analytics():
 
 def generate_mjpeg_stream():
     """Generator function that captures camera frames and yields MJPEG HTTP stream."""
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     if not cap.isOpened():
-        logger.warning("Camera index 0 not available for stream. Serving synthetic frame stream.")
+        logger.warning("Camera index 1 not available for stream. Serving synthetic frame stream.")
         # Synthetic frame fallback generator
         while True:
             img = np.zeros((480, 640, 3), dtype=np.uint8)

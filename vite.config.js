@@ -14,6 +14,12 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3002',
         changeOrigin: true,
+      },
+      // Forward all /flask/* calls to the Flask YOLO backend
+      '/flask': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/flask/, ''),
       }
     }
   },

@@ -52,7 +52,7 @@ class Config:
         # ----------------------------------------------------------------------
         self.SERIAL_PORT: str = os.getenv("SERIAL_PORT", "COM3")
         self.BAUD_RATE: int = self._get_int_env("BAUD_RATE", default=9600)
-        self.CAMERA_INDEX: int = self._get_int_env("CAMERA_INDEX", default=0)
+        self.CAMERA_INDEX: int = self._get_int_env("CAMERA_INDEX", default=1)
 
         # ----------------------------------------------------------------------
         # 4. YOLO Model Settings

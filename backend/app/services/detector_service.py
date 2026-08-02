@@ -26,12 +26,12 @@ try:
     from app.config.config import Config
     _cfg = Config()
     MODEL_PATH = getattr(_cfg, "YOLO_MODEL_PATH", "models/best.pt")
-    CAMERA_INDEX = getattr(_cfg, "CAMERA_INDEX", 0)
+    CAMERA_INDEX = getattr(_cfg, "CAMERA_INDEX", 1)
     CONF_THRESHOLD = getattr(_cfg, "CONFIDENCE_THRESHOLD", 0.5)
 except Exception:
     from app.config.settings import settings
     MODEL_PATH = getattr(settings, "YOLO_MODEL_PATH", "models/best.pt")
-    CAMERA_INDEX = 0
+    CAMERA_INDEX = 1
     CONF_THRESHOLD = 0.5
 
 logger = get_logger(__name__)

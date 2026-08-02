@@ -130,7 +130,7 @@ class KhetRakshakApp:
             logger.error(f"YOLO detector loading warning (non-fatal): {e}")
 
         # 5. Initialize Camera Hardware
-        cam_idx = getattr(self.config, "CAMERA_INDEX", 0)
+        cam_idx = getattr(self.config, "CAMERA_INDEX", 1)
         logger.info(f"Opening camera feed on index {cam_idx}...")
         self.camera_cap = cv2.VideoCapture(cam_idx)
         if not self.camera_cap.isOpened():
@@ -254,7 +254,7 @@ class KhetRakshakApp:
         telegram_sent = False
         try:
             result = self.telegram.send_detection_alert(
-                camera_name=f"Camera-{getattr(self.config, 'CAMERA_INDEX', 0)}",
+                camera_name=f"Camera-{getattr(self.config, 'CAMERA_INDEX', 1)}",
                 zone=self.device_id,
                 confidence=conf,
                 image_path_or_url=public_image_url or snapshot_filename,
@@ -307,7 +307,7 @@ class KhetRakshakApp:
             try:
                 if not self.camera_cap or not self.camera_cap.isOpened():
                     logger.warning("Camera connection unavailable. Re-attempting connection...")
-                    cam_idx = getattr(self.config, "CAMERA_INDEX", 0)
+                    cam_idx = getattr(self.config, "CAMERA_INDEX", 1)
                     self.camera_cap = cv2.VideoCapture(cam_idx)
                     time.sleep(2.0)
                     continue

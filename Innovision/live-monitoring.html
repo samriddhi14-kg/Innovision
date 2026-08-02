@@ -18,36 +18,133 @@
 <link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
-  <aside class="sidebar" id="sidebar"><a class="brand" href="landingpage.html"><span class="brand-mark" aria-hidden="true"><svg class="brand-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span><span>khetRakshak</span></a><nav class="sidebar-nav"><a class="nav-item" href="dashboard.html"><i class="icon">⌂</i><span>Dashboard</span></a><a class="nav-item active" href="live-monitoring.html"><i class="icon">◉</i><span>Live Monitoring</span></a><a class="nav-item" href="dashboard.html#status"><i class="icon">◐</i><span>Deterrent Response</span></a><a class="nav-item" href="dashboard.html#status"><i class="icon">◖</i><span>Speaker Status</span></a><a class="nav-item" href="dashboard.html#history"><i class="icon">↺</i><span>Detection History</span></a><a class="nav-item" href="dashboard.html#alerts"><i class="icon">♢</i><span>Notifications</span></a><a class="nav-item" href="dashboard.html#analytics"><i class="icon">▥</i><span>Analytics</span></a><a class="nav-item" href="#profile"><i class="icon">○</i><span>Profile</span></a><a class="nav-item" href="#settings"><i class="icon">⚙</i><span>Settings</span></a></nav><div class="sidebar-bottom"><a class="nav-item" href="landingpage.html"><i class="icon">↪</i><span>Logout</span></a><button class="collapse-btn" id="collapseButton"><i class="collapse-icon" aria-hidden="true"></i><span>Collapse sidebar</span></button></div></aside>
+  <aside class="sidebar" id="sidebar"><a class="brand" href="landingpage.html"><span class="brand-mark" aria-hidden="true"><svg class="brand-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span><span>khetRakshak</span></a><nav class="sidebar-nav"><a class="nav-item" href="dashboard.html"><i class="icon">⌂</i><span>Dashboard</span></a><a class="nav-item active" href="live-monitoring.html"><i class="icon">◉</i><span>Live Monitoring</span></a><a class="nav-item" href="warning-light-status.html"><i class="icon">◐</i><span>Deterrent Response</span></a><a class="nav-item" href="speaker-status.html"><i class="icon">◖</i><span>Speaker Status</span></a><a class="nav-item" href="detection-history.html"><i class="icon">↺</i><span>Detection History</span></a><a class="nav-item" href="notifications.html"><i class="icon">♢</i><span>Notifications</span></a><a class="nav-item" href="analytics.html"><i class="icon">▥</i><span>Analytics</span></a><a class="nav-item" href="profile.html"><i class="icon">○</i><span>Profile</span></a><a class="nav-item" href="settings.html"><i class="icon">⚙</i><span>Settings</span></a></nav><div class="sidebar-bottom"><a class="nav-item" href="landingpage.html"><i class="icon">↪</i><span>Logout</span></a><button class="collapse-btn" id="collapseButton"><i class="collapse-icon" aria-hidden="true"></i><span>Collapse sidebar</span></button></div></aside>
   <div class="main-wrap"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button><h1 class="page-title">Live Monitoring</h1></div><div class="top-actions"><label class="search"><span>⌕</span><input type="search" placeholder="Search cameras"></label><span class="date" id="currentDate"></span><button class="bell" aria-label="Notifications">♢<b></b></button><div class="profile" id="profileButton"><span class="profile-text"><strong>Welcome Back, Arjun Sharma!</strong><span>Farm Owner</span></span><span class="avatar">AS</span><div class="profile-menu"><a href="#profile">My Profile</a><a href="#settings">Settings</a><a href="landingpage.html">Logout</a></div></div></div></header>
     <main class="content"><section class="page-head fade"><div><h1>Live Monitoring</h1><p>Monitor all AI cameras installed on your farm in real time. Instantly view monkey detections, camera status, detection confidence, and the current protection status of each monitoring zone.</p></div><span class="live-pill"><i></i> Live system feed</span></section><section class="status-bar fade"><div class="status-tile"><i class="tile-icon">●</i><div><small>System Status</small><strong class="safe">Online</strong></div></div><div class="status-tile"><i class="tile-icon">◉</i><div><small>Total Cameras</small><strong>2 Connected</strong></div></div><div class="status-tile"><i class="tile-icon">✓</i><div><small>Online Cameras</small><strong>2 Online</strong></div></div><div class="status-tile"><i class="tile-icon">◒</i><div><small>Current Farm Status</small><strong class="safe">● Safe</strong></div></div></section><div class="filters" role="group" aria-label="Camera filters"><button class="filter active" data-filter="all">All Cameras <b>2</b></button><button class="filter" data-filter="online">Online</button><button class="filter" data-filter="offline">Offline</button><button class="filter" data-filter="detected">Monkey Detected</button><button class="filter" data-filter="clear">No Detection</button></div><section class="monitor-layout"><div class="camera-area loading" id="cameraArea"><div class="skeleton-grid"><div class="skeleton"><div class="sk-feed"></div><div class="sk-text"></div><div class="sk-line"></div><div class="sk-line"></div></div><div class="skeleton"><div class="sk-feed"></div><div class="sk-text"></div><div class="sk-line"></div><div class="sk-line"></div></div></div><div class="camera-grid"><article class="camera-card" data-status="online clear"><div class="feed one"><span class="feed-grid"></span><span class="zone-tag">East Boundary · Zone 01</span></div><div class="camera-body"><div class="camera-head"><div><h2>Camera 01</h2><p>East Boundary / Crop Field</p></div><span class="online">● Online</span></div><span class="detection-badge">✓ No Monkey Detected</span><div class="camera-meta"><div><small>Confidence</small><strong>—</strong></div><div><small>Monitoring Zone</small><strong>East Field</strong></div><div><small>Last Detection</small><strong>Today, 10:20 AM</strong></div><div><small>Deterrent Light</small><strong class="safe">● Standby · Safe</strong></div><div><small>Linked Speaker</small><strong>East Speaker · Ready</strong></div></div><div class="camera-actions"><button>View Full Screen ↗</button><button>Camera Details</button></div></div></article><article class="camera-card detected" data-status="online detected"><div class="feed two"><span class="feed-grid"></span><span class="zone-tag">North Field · Zone 02</span></div><div class="camera-body"><div class="camera-head"><div><h2>Camera 02</h2><p>North Field / Vegetable Rows</p></div><span class="online">● Online</span></div><span class="detection-badge detected-badge">! Monkey Detected</span><div class="camera-meta"><div><small>Confidence</small><strong class="attention">96%</strong></div><div><small>Detection Zone</small><strong>North Field</strong></div><div><small>Detection Time</small><strong>Today, 09:52 AM</strong></div><div><small>Deterrent Light</small><strong class="attention">● Detected</strong></div><div><small>Linked Speaker</small><strong>North Speaker · Active</strong></div><div><small>SMS Status</small><strong class="safe">✓ Alert Sent</strong></div></div><div class="camera-actions"><button>View Full Screen ↗</button><button>Camera Details</button></div></div></article></div><div class="empty-state"><div class="empty-illustration">◉</div><h2>No cameras have been configured for your farm yet.</h2><p>Connect your khetRakshak cameras to start monitoring your farm in real time.</p><button class="configure">Configure Cameras</button></div></div><aside class="activity-panel" id="activity"><div class="activity-head"><h2>Live Activity</h2><span>● Updating live</span></div><div class="activity-list"><div class="activity"><span class="activity-time">10:23 AM</span><i class="activity-dot"></i><div><strong>System returned to Safe mode.</strong><span>North Field secured</span></div></div><div class="activity"><span class="activity-time">10:23 AM</span><i class="activity-dot"></i><div><strong>Monkey left protected area.</strong><span>Camera 02 · North Field</span></div></div><div class="activity"><span class="activity-time">10:21 AM</span><i class="activity-dot"></i><div><strong>SMS alert sent to farmer.</strong><span>Delivery confirmed</span></div></div><div class="activity"><span class="activity-time">10:20 AM</span><i class="activity-dot"></i><div><strong>East Speaker activated.</strong><span>Directional response sent</span></div></div><div class="activity"><span class="activity-time">10:20 AM</span><i class="activity-dot"></i><div><strong>Monkey detected by Camera 02.</strong><span>96% confidence · North Field</span></div></div></div></aside></section></main></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/api-client.js"></script>
   <script>
-    const sidebar=document.getElementById('sidebar');
-    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item=>item.dataset.tooltip=item.querySelector('span').textContent);
-    document.getElementById('collapseButton').addEventListener('click',()=>sidebar.classList.toggle('collapsed'));
-    document.getElementById('mobileMenu').addEventListener('click',()=>sidebar.classList.toggle('open'));
-    document.getElementById('profileButton').addEventListener('click',event=>{if(!event.target.closest('.profile-menu a'))document.getElementById('profileButton').classList.toggle('open')});
-    document.addEventListener('click',event=>{if(!event.target.closest('#profileButton'))document.getElementById('profileButton').classList.remove('open')});
-    document.getElementById('currentDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-    
-    // Replace feed 1 background with live MJPEG stream element
+    // ── Sidebar / UI boilerplate ───────────────────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => item.dataset.tooltip = item.querySelector('span').textContent);
+    document.getElementById('collapseButton').addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+    document.getElementById('mobileMenu').addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.getElementById('profileButton').addEventListener('click', event => { if (!event.target.closest('.profile-menu a')) document.getElementById('profileButton').classList.toggle('open') });
+    document.addEventListener('click', event => { if (!event.target.closest('#profileButton')) document.getElementById('profileButton').classList.remove('open') });
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+    // ── Flask backend URL (via Vite proxy /flask → http://127.0.0.1:5000) ──
+    const FLASK_BASE = '/flask';
+    const VIDEO_FEED_URL = `${FLASK_BASE}/video_feed`;
+    const STATUS_URL     = `${FLASK_BASE}/status`;
+    const START_URL      = `${FLASK_BASE}/start`;
+
+    // ── Inject live MJPEG stream into Camera 01 feed slot ─────────────────
     const feedOne = document.querySelector('.feed.one');
     if (feedOne) {
+      feedOne.style.background = '#0d1f17';
       feedOne.innerHTML = `
-        <img src="http://localhost:8000/api/video_feed" style="width:100%;height:100%;object-fit:cover;" alt="Live USB Camera Feed" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=84';" />
+        <img
+          id="liveFeedImg"
+          src="${VIDEO_FEED_URL}"
+          style="width:100%;height:100%;object-fit:cover;display:block;"
+          alt="Live USB Camera Feed"
+        />
+        <div id="feedOfflineBanner" style="display:none;position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,31,23,.88);color:#a9c2b4;font-size:12px;gap:8px">
+          <span style="font-size:26px">◉</span>
+          <strong style="font-size:13px;color:#fff">Camera Offline</strong>
+          <span>Flask backend not reachable</span>
+          <button onclick="tryStartFlask()" style="margin-top:8px;padding:7px 14px;background:#b7e36f;color:#153b2c;border:0;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">Retry Connection</button>
+        </div>
         <span class="feed-grid"></span>
-        <span class="zone-tag">Camera 01 · Primary USB Feed</span>
+        <span class="zone-tag" id="feedZoneTag">Camera 01 · Connecting...</span>
+        <span id="feedStatusBadge" style="position:absolute;top:13px;right:13px;padding:4px 8px;border-radius:4px;font-size:9px;font-weight:700;background:#efbd4e;color:#153b2c">CONNECTING</span>
       `;
+
+      // Show/hide offline banner based on img load state
+      const img = document.getElementById('liveFeedImg');
+      const banner = document.getElementById('feedOfflineBanner');
+      const badge  = document.getElementById('feedStatusBadge');
+      const tag    = document.getElementById('feedZoneTag');
+
+      img.addEventListener('error', () => {
+        banner.style.display = 'flex';
+        img.style.display = 'none';
+        badge.textContent = 'OFFLINE';
+        badge.style.background = '#d8675f';
+        badge.style.color = '#fff';
+        tag.textContent = 'Camera 01 · Offline';
+      });
+
+      img.addEventListener('load', () => {
+        banner.style.display = 'none';
+        img.style.display = 'block';
+        badge.textContent = 'LIVE';
+        badge.style.background = '#d45d56';
+        badge.style.color = '#fff';
+        tag.textContent = 'Camera 01 · Primary USB Feed';
+      });
     }
 
-    setTimeout(()=>{
+    // ── Auto-start Flask camera if not running ─────────────────────────────
+    async function tryStartFlask() {
+      try {
+        const res = await fetch(STATUS_URL);
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.running) {
+            await fetch(START_URL, { method: 'POST' });
+          }
+          // Reload the image src to reconnect stream
+          const img = document.getElementById('liveFeedImg');
+          if (img) { img.src = VIDEO_FEED_URL + '?t=' + Date.now(); }
+        }
+      } catch (e) {
+        console.warn('Flask backend not reachable:', e.message);
+      }
+    }
+
+    // ── Status polling — updates status tiles every 3s ─────────────────────
+    const systemStatusEl  = document.querySelector('.status-tile:first-child strong');
+    const farmStatusEl    = document.querySelector('.status-tile:last-child strong');
+
+    async function pollStatus() {
+      try {
+        const res = await fetch(STATUS_URL, { signal: AbortSignal.timeout(2000) });
+        if (!res.ok) throw new Error('not ok');
+        const data = await res.json();
+
+        if (systemStatusEl) {
+          systemStatusEl.textContent = data.running ? 'Online' : 'Offline';
+          systemStatusEl.style.color = data.running ? 'var(--green)' : 'var(--red)';
+        }
+        if (farmStatusEl) {
+          if (data.monkey_alert) {
+            farmStatusEl.innerHTML = `<span style="color:var(--red)">⚠ Monkey Detected (${data.confidence}%)</span>`;
+          } else {
+            farmStatusEl.innerHTML = `<span style="color:var(--green)">● Safe</span>`;
+          }
+        }
+      } catch (_) {
+        if (systemStatusEl) {
+          systemStatusEl.textContent = 'Offline';
+          systemStatusEl.style.color = 'var(--red)';
+        }
+      }
+    }
+
+    // Initial connect attempt + poll loop
+    tryStartFlask();
+    pollStatus();
+    setInterval(pollStatus, 3000);
+
+    // ── Skeleton loader ────────────────────────────────────────────────────
+    setTimeout(() => {
       document.getElementById('cameraArea').classList.remove('loading');
       document.getElementById('cameraArea').classList.add('loaded');
-    }, 400);
+    }, 600);
 
-    // Supabase Realtime Listener
+    // ── Supabase Realtime Listener ─────────────────────────────────────────
     if (window.KhetRakshakAPI) {
       window.KhetRakshakAPI.subscribeToDetections((newDet) => {
         const list = document.querySelector('.activity-list');

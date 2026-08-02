@@ -13,3 +13,4 @@ dist/
 
 # VS Code settings
 .vscode/
+/human-monkey/my_model

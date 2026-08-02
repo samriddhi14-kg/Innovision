@@ -1,0 +1,3 @@
+"""
+KhetRakshak App Package.
+"""

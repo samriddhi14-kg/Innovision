@@ -52,16 +52,62 @@
   <div class="app"><aside class="sidebar" id="sidebar"><a class="brand" href="landingpage.html"><span class="brand-mark" aria-hidden="true"><svg class="brand-symbol" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4C12 4 5 8 4 19c6-1 11-5 16-15Z"></path><path d="M4 19c4-4 7-7 12-10"></path></svg></span><span>khetRakshak</span></a><nav class="sidebar-nav"><a class="nav-item active" href="#dashboard"><i class="icon">⌂</i><span>Dashboard</span></a><a class="nav-item" href="#cameras"><i class="icon">◉</i><span>Live Monitoring</span></a><a class="nav-item" href="#status"><i class="icon">◖</i><span>Speaker Status</span></a><a class="nav-item" href="#history"><i class="icon">↺</i><span>Detection History</span></a><a class="nav-item" href="#alerts"><i class="icon">♢</i><span>Notifications</span></a><a class="nav-item" href="#analytics"><i class="icon">▥</i><span>Analytics</span></a><a class="nav-item" href="#profile"><i class="icon">○</i><span>Profile</span></a><a class="nav-item" href="#settings"><i class="icon">⚙</i><span>Settings</span></a></nav><div class="sidebar-bottom"><a class="nav-item" href="landingpage.html"><i class="icon">↪</i><span>Logout</span></a><button class="collapse-btn" id="collapseButton"><i class="collapse-icon" aria-hidden="true"></i><span>Collapse sidebar</span></button></div></aside><div class="main-wrap"><header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">☰</button><h1 class="page-title">Dashboard</h1></div><div class="top-actions"><label class="search"><span>⌕</span><input type="search" placeholder="Search dashboard"></label><span class="date" id="currentDate"></span><button class="bell" aria-label="Notifications">♢<b></b></button><div class="profile" id="profileButton"><span class="profile-text"><strong>Welcome Back, <span id="dashboardUserName">there</span>!</strong><span>Farm Owner</span></span><span class="avatar" id="dashboardAvatar">AS</span><div class="profile-menu"><a href="#profile">My Profile</a><a href="#settings">Settings</a><a href="landingpage.html">Logout</a></div></div></div></header><main class="content" id="dashboard"><section class="welcome fade"><div><h1>Welcome Back, <span id="dashboardUserName">there</span>!</h1><p>Here's a real-time overview of your farm protection system.</p></div><span class="live-pill"><i></i> System online</span></section><section class="overview fade"><div class="overview-card"><div class="overview-icon">◉</div><small>Total Cameras</small><strong>2 Active</strong><span>All cameras online</span></div><div class="overview-card"><div class="overview-icon">◖</div><small>Smart Speakers</small><strong>8 Installed</strong><span>Ready to activate</span></div><div class="overview-card"><div class="overview-icon">♢</div><small>Monkey Detections</small><strong>4 Today</strong><span>Down 20% this week</span></div><div class="overview-card"><div class="overview-icon">⌁</div><small>SMS Alerts</small><strong>4 Alerts</strong><span>Delivered successfully</span></div><div class="overview-card"><div class="overview-icon">✓</div><small>System Health</small><strong>99% Healthy</strong><span>All services stable</span></div><div class="overview-card"><div class="overview-icon">◷</div><small>Last Detection</small><strong>10:20 AM</strong><span>East Boundary</span></div></section><div class="dashboard-grid"><section class="panel" id="cameras"><div class="panel-head"><h2>Live Camera Preview</h2><a class="panel-link" href="#cameras">View all cameras →</a></div><div class="camera-grid"><article class="camera-card"><div class="camera-img"><span class="camera-live">● LIVE</span></div><div class="camera-info"><h3>Camera 01 · East Boundary</h3><p>Crop field / East zone</p><div class="camera-foot"><span class="online">● Online</span><span>Last detection: 10:20 AM</span></div></div></article><article class="camera-card alerting"><div class="camera-img"><span class="camera-live">● LIVE</span></div><div class="camera-info"><h3>Camera 02 · North Field</h3><p>Vegetable rows / North zone</p><div class="camera-foot"><span class="alert-level">● Attention</span><span>Last detection: 09:52 AM</span></div></div></article></div></section><section class="panel" id="alerts"><div class="panel-head"><h2>Recent Alerts</h2><a class="panel-link" href="#alerts">View all →</a></div><div class="alerts"><div class="alert-row"><span class="alert-time">10:20 AM</span><i class="alert-dot"></i><div class="alert-copy"><strong>Monkey detected near East Boundary.</strong><span>Camera 01 · Detection zone East</span></div></div><div class="alert-row"><span class="alert-time">10:20 AM</span><i class="alert-dot"></i><div class="alert-copy"><strong>East Speaker activated.</strong><span>Directional response sent</span></div></div><div class="alert-row"><span class="alert-time">10:21 AM</span><i class="alert-dot"></i><div class="alert-copy"><strong>SMS alert sent successfully.</strong><span>Farmer notification delivered</span></div></div><div class="alert-row"><span class="alert-time">10:23 AM</span><i class="alert-dot"></i><div class="alert-copy"><strong>Area secured.</strong><span>System returned to Safe mode</span></div></div></div></section><section class="panel history" id="history"><div class="panel-head"><h2>Detection History Preview</h2><a class="panel-link" href="#history">View full history →</a></div><table class="history-table"><thead><tr><th>Date</th><th>Time</th><th>Camera</th><th>Detection Zone</th><th>Alert Level</th><th>Status</th></tr></thead><tbody><tr><td>Today</td><td>10:20 AM</td><td>Camera 01</td><td>East Boundary</td><td><span class="level medium">Medium</span></td><td class="good">Resolved</td></tr><tr><td>Today</td><td>09:52 AM</td><td>Camera 02</td><td>North Field</td><td><span class="level low">Low</span></td><td class="good">Resolved</td></tr><tr><td>Yesterday</td><td>04:18 PM</td><td>Camera 01</td><td>East Boundary</td><td><span class="level high">High</span></td><td class="good">Resolved</td></tr><tr><td>Yesterday</td><td>11:05 AM</td><td>Camera 02</td><td>North Field</td><td><span class="level low">Low</span></td><td class="good">Resolved</td></tr><tr><td>12 Jun</td><td>08:40 AM</td><td>Camera 01</td><td>East Boundary</td><td><span class="level medium">Medium</span></td><td class="good">Resolved</td></tr></tbody></table></section></div></main></div></div>
   <script>const sidebar=document.getElementById('sidebar');document.getElementById('collapseButton').addEventListener('click',()=>sidebar.classList.toggle('collapsed'));document.getElementById('mobileMenu').addEventListener('click',()=>sidebar.classList.toggle('open'));document.getElementById('profileButton').addEventListener('click',event=>{if(event.target.closest('.profile-menu a'))return;document.getElementById('profileButton').classList.toggle('open')});document.addEventListener('click',event=>{if(!event.target.closest('#profileButton'))document.getElementById('profileButton').classList.remove('open')});const date=new Date();document.getElementById('currentDate').textContent=date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(link=>link.classList.remove('active'));item.classList.add('active');sidebar.classList.remove('open')}));</script>
 <script>document.querySelectorAll('.sidebar-nav .nav-item').forEach(item=>item.dataset.tooltip=item.querySelector('span').textContent);document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT).nextNode();[...document.body.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim()==='+').forEach(node=>node.remove());</script>
-<script src="js/user-session.js"></script>
-<script>document.querySelectorAll('.sidebar-nav .nav-item').forEach(item=>{if(item.textContent.includes('Live Monitoring'))item.href='live-monitoring.html';if(item.textContent.includes('Warning Light Status'))item.href='warning-light-status.html';if(item.textContent.includes('Speaker Status'))item.href='speaker-status.html';if(item.textContent.includes('Detection History'))item.href='detection-history.html';if(item.textContent.includes('Notifications'))item.href='notifications.html';if(item.textContent.includes('Analytics'))item.href='analytics.html';if(item.textContent.includes('Profile'))item.href='profile.html';if(item.textContent.includes('Settings'))item.href='settings.html'});</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/api-client.js"></script>
 <script>
-  const storedUserName = localStorage.getItem('khetRakshakUserName') || localStorage.getItem('userName') || 'there';
-  const dashboardUserName = document.getElementById('dashboardUserName');
-  const dashboardGreetingName = document.getElementById('dashboardGreetingName');
-  const dashboardAvatar = document.getElementById('dashboardAvatar');
-  if(dashboardUserName) dashboardUserName.textContent = storedUserName;
-  if(dashboardGreetingName) dashboardGreetingName.textContent = storedUserName;
-  if(dashboardAvatar && storedUserName !== 'there') dashboardAvatar.textContent = storedUserName.split(/\s+/).filter(Boolean).map(name=>name[0]).slice(0,2).join('').toUpperCase();
+  // Dynamic Dashboard Data Integration
+  async function loadDashboardData() {
+    if (!window.KhetRakshakAPI) return;
+    
+    // 1. Load summary metrics
+    const summary = await window.KhetRakshakAPI.getDashboardSummary();
+    if (summary) {
+      const cards = document.querySelectorAll('.overview-card strong');
+      if (cards[0]) cards[0].textContent = `${summary.active_cameras || 2} Active`;
+      if (cards[1]) cards[1].textContent = `${summary.total_speakers || 4} Installed`;
+      if (cards[2]) cards[2].textContent = `${summary.today_detections || 0} Today`;
+      if (cards[3]) cards[3].textContent = `${summary.sms_alerts || 0} Alerts`;
+      if (cards[4]) cards[4].textContent = `${summary.system_health || '99%'} Healthy`;
+      if (cards[5]) cards[5].textContent = summary.last_detection_time || 'None';
+    }
+
+    // 2. Load recent detections history preview
+    const detections = await window.KhetRakshakAPI.getDetections(5);
+    if (detections && detections.length > 0) {
+      const tbody = document.querySelector('.history-table tbody');
+      if (tbody) {
+        tbody.innerHTML = detections.map(det => {
+          const dateObj = det.created_at ? new Date(det.created_at) : new Date();
+          const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const conf = Math.round(det.confidence || 90);
+          const levelClass = conf > 90 ? 'high' : conf > 70 ? 'medium' : 'low';
+          const levelText = conf > 90 ? 'High' : conf > 70 ? 'Medium' : 'Low';
+          
+          return `
+            <tr>
+              <td>${dateStr}</td>
+              <td>${timeStr}</td>
+              <td>${det.device_id || 'Camera 01'}</td>
+              <td>Field Zone</td>
+              <td><span class="level ${levelClass}">${levelText}</span></td>
+              <td class="good">Logged</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // 3. Listen to Realtime new detections
+    window.KhetRakshakAPI.subscribeToDetections((newDet) => {
+      console.log('Realtime detection trigger on dashboard:', newDet);
+      loadDashboardData();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardData();
+  });
 </script>
 </body>
 </html>

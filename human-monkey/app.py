@@ -1,16 +1,15 @@
 """
-app.py - Refactored Monkey Detector (Ultralytics YOLO Backend)
+app.py - Refactored Monkey Detector (Ultralytics YOLO Backend) with Dual Camera Support
 
 Architecture:
 =============
 - Model loaded via Ultralytics YOLO using `my_model/best.pt` and `my_model/data.yaml`
-- CameraThread       : Grabs video frames at ~30 FPS, stores latest in `latest_frame`
-- DetectionThread    : Runs inference every N frames, performs strict class filtering
-                       and N-frame temporal debouncing before triggering relay/alert sound
+- CameraThread       : Grabs video frames at ~30 FPS, one for each camera (cam_id=1, cam_id=2)
+- DetectionThread    : Runs inference every N frames. Uses an inference lock to prevent GPU/CPU OOM.
 - Sound Player       : Pygame mixer playing warning audio (`sounds/tiger.mp3`) on valid alert
 - Serial Controller  : Thread-safe Arduino communication (b"1" = monkey alert, b"0" = clear)
-- generate_frames()  : Reads `latest_frame`, draws `last_result` overlay, yields MJPEG stream
-- /start /stop       : Flask HTTP lifecycle endpoints
+- generate_frames()  : Reads `latest_frame`, draws `last_result` overlay, yields MJPEG stream per cam
+- /start /stop       : Flask HTTP lifecycle endpoints supporting `/<int:cam_id>`
 """
 
 import os
@@ -200,6 +199,70 @@ def stop_alert_sound() -> None:
             _sound_playing = False
             _sound_channel = None
 
+# ---------------------------------------------------------------------------
+# Telegram Bot Alert System (Text & Photo Snapshot Notifications)
+# ---------------------------------------------------------------------------
+TELEGRAM_BOT_TOKEN = os.environ.get("8871543938:AAGhPewd0ivJchVLrrUzgk_bEWauBe9RYZg", "").strip()
+
+def send_telegram_alert(chat_id: str, cam_id: int, confidence: float, image_bytes: Optional[bytes] = None) -> None:
+    """Send an instant Telegram alert (text + photo snapshot) to the given Chat ID."""
+    if not TELEGRAM_BOT_TOKEN:
+        log_msg(f"[Telegram Alert] (No BOT_TOKEN set - Simulated to Chat ID {chat_id}): MONKEY DETECTED by Camera 0{cam_id} ({confidence*100:.1f}%)")
+        return
+        
+    caption = f"🚨 *khetRakshak MONKEY ALERT!* 🐒\n\n📷 *Camera:* Camera 0{cam_id}\n🎯 *Confidence:* {round(confidence * 100, 1)}%\n⏰ *Time:* {datetime.datetime.now().strftime('%I:%M %p')}\n📍 *Location:* Protected Farm Area"
+    
+    try:
+        import urllib.request
+        import json
+        
+        if image_bytes:
+            boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
+            body = []
+            body.append(f'--{boundary}'.encode())
+            body.append(f'Content-Disposition: form-data; name="chat_id"'.encode())
+            body.append(b'')
+            body.append(str(chat_id).encode())
+            
+            body.append(f'--{boundary}'.encode())
+            body.append(f'Content-Disposition: form-data; name="caption"'.encode())
+            body.append(b'')
+            body.append(caption.encode())
+            
+            body.append(f'--{boundary}'.encode())
+            body.append(f'Content-Disposition: form-data; name="parse_mode"'.encode())
+            body.append(b'')
+            body.append(b'Markdown')
+            
+            body.append(f'--{boundary}'.encode())
+            body.append(f'Content-Disposition: form-data; name="photo"; filename="monkey.jpg"'.encode())
+            body.append(b'Content-Type: image/jpeg')
+            body.append(b'')
+            body.append(image_bytes)
+            
+            body.append(f'--{boundary}--'.encode())
+            body.append(b'')
+            
+            payload = b'\r\n'.join(body)
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto",
+                data=payload,
+                headers={'Content-Type': f'multipart/form-data; boundary={boundary}'}
+            )
+            urllib.request.urlopen(req, timeout=10)
+            log_msg(f"[Telegram] Sent Photo Alert to Chat ID {chat_id} for Camera 0{cam_id}")
+        else:
+            data = json.dumps({"chat_id": chat_id, "text": caption, "parse_mode": "Markdown"}).encode('utf-8')
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+                data=data,
+                headers={'Content-Type': 'application/json'}
+            )
+            urllib.request.urlopen(req, timeout=10)
+            log_msg(f"[Telegram] Sent Text Alert to Chat ID {chat_id} for Camera 0{cam_id}")
+    except Exception as exc:
+        log_msg(f"[Telegram Error] Failed to send alert to {chat_id}: {exc}")
+
 
 # ---------------------------------------------------------------------------
 # Arduino Hardware Communication
@@ -238,49 +301,63 @@ def send_arduino(value: bytes, label: str) -> None:
 # ---------------------------------------------------------------------------
 # Shared State & Locks
 # ---------------------------------------------------------------------------
-_frame_lock  = threading.Lock()
-latest_frame: Optional[object] = None   # Raw BGR numpy array
+_inference_lock = threading.Lock() # Prevent two cameras from running YOLO at the exact same moment
 
-_result_lock = threading.Lock()
-last_result: Optional[Dict] = None   # {"monkey_alert": bool, "debounced": bool, "count": int, "boxes": [...]}
+# Dictionary states for multiple cameras: cam_id -> state
+latest_frames = {1: None, 2: None}
+last_results = {1: None, 2: None}
+running_cams = {1: False, 2: False}
 
-running = False
+_frame_locks = {1: threading.Lock(), 2: threading.Lock()}
+_result_locks = {1: threading.Lock(), 2: threading.Lock()}
+
+# SMS alert phone numbers per camera — now a list for multiple recipients
+camera_phones: Dict[int, List[str]] = {1: [], 2: []}
+_phone_lock = threading.Lock()
+
+# Rate-limiting: stores the last time an SMS was sent per camera (unix timestamp)
+SMS_COOLDOWN_SECONDS = 300  # 5 minutes between alerts
+last_sms_time: Dict[int, float] = {1: 0.0, 2: 0.0}
 
 # ---------------------------------------------------------------------------
 # Camera Thread
 # ---------------------------------------------------------------------------
 class CameraThread(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True, name="CameraThread")
+    def __init__(self, cam_id: int, src_index: int):
+        super().__init__(daemon=True, name=f"CameraThread_{cam_id}")
+        self.cam_id = cam_id
+        self.src_index = src_index
         self._cap: Optional[cv2.VideoCapture] = None
 
     def open(self) -> bool:
-        self._cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+        self._cap = cv2.VideoCapture(self.src_index, cv2.CAP_DSHOW)
         if not self._cap.isOpened():
             # Fallback for systems without CAP_DSHOW
-            self._cap = cv2.VideoCapture(1)
+            self._cap = cv2.VideoCapture(self.src_index)
 
         if not self._cap.isOpened():
-            log_msg("Failed to open webcam")
+            log_msg(f"[Cam {self.cam_id}] Failed to open webcam at index {self.src_index}")
             self._cap = None
             return False
 
         self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        log_msg("Webcam opened successfully")
+        log_msg(f"[Cam {self.cam_id}] Webcam opened successfully on index {self.src_index}")
         return True
 
     def release(self) -> None:
         if self._cap:
             self._cap.release()
             self._cap = None
-            log_msg("Webcam released")
+            log_msg(f"[Cam {self.cam_id}] Webcam released")
+            
+        with _frame_locks[self.cam_id]:
+            latest_frames[self.cam_id] = None
 
     def run(self) -> None:
-        global latest_frame
-        log_msg("CameraThread running")
+        log_msg(f"[Cam {self.cam_id}] CameraThread running")
         while True:
-            if not running or self._cap is None:
+            if not running_cams[self.cam_id] or self._cap is None:
                 time.sleep(0.02)
                 continue
 
@@ -289,32 +366,36 @@ class CameraThread(threading.Thread):
                 time.sleep(0.02)
                 continue
 
-            with _frame_lock:
-                latest_frame = frame
+            with _frame_locks[self.cam_id]:
+                latest_frames[self.cam_id] = frame
 
-camera_thread = CameraThread()
+# Create thread instances
+camera_threads = {
+    1: CameraThread(cam_id=1, src_index=0),
+    2: CameraThread(cam_id=2, src_index=1)
+}
 
 # ---------------------------------------------------------------------------
 # Detection Thread with Strict Class Filtering & Temporal Debouncing
 # ---------------------------------------------------------------------------
 class DetectionThread(threading.Thread):
-    def __init__(self):
-        super().__init__(daemon=True, name="DetectionThread")
+    def __init__(self, cam_id: int):
+        super().__init__(daemon=True, name=f"DetectionThread_{cam_id}")
+        self.cam_id = cam_id
 
     def run(self) -> None:
-        global last_result
         frame_counter = 0
         consecutive_monkey_count = 0
-        log_msg("DetectionThread running")
+        log_msg(f"[Cam {self.cam_id}] DetectionThread running")
 
         while True:
-            if not running:
+            if not running_cams[self.cam_id]:
                 consecutive_monkey_count = 0
                 time.sleep(0.05)
                 continue
 
-            with _frame_lock:
-                frame = latest_frame
+            with _frame_locks[self.cam_id]:
+                frame = latest_frames[self.cam_id]
 
             if frame is None:
                 time.sleep(0.05)
@@ -326,8 +407,9 @@ class DetectionThread(threading.Thread):
                 continue
 
             try:
-                # Run inference via Ultralytics
-                results = model(frame, verbose=False, conf=CONF_THRES)
+                # Run inference via Ultralytics inside a global lock to prevent OOM
+                with _inference_lock:
+                    results = model(frame, verbose=False, conf=CONF_THRES)
                 
                 boxes_summary = []
                 monkey_detected_in_frame = False
@@ -364,8 +446,8 @@ class DetectionThread(threading.Thread):
 
                 debounced_alert = (consecutive_monkey_count >= DEBOUNCE_FRAMES)
 
-                with _result_lock:
-                    last_result = {
+                with _result_locks[self.cam_id]:
+                    last_results[self.cam_id] = {
                         "monkey_detected_raw": monkey_detected_in_frame,
                         "debounced": debounced_alert,
                         "consecutive_count": consecutive_monkey_count,
@@ -373,29 +455,64 @@ class DetectionThread(threading.Thread):
                         "boxes": boxes_summary
                     }
 
-                # Trigger Hardware Payload & Audio Warning
-                if debounced_alert:
-                    log_msg(f"MONKEY ALERT CONFIRMED (Count={consecutive_monkey_count}/{DEBOUNCE_FRAMES}, Conf={best_monkey_conf:.2f})")
+                # Trigger Hardware Payload & Audio Warning (if either camera detects a monkey, trigger alarm)
+                # We check global state from both results
+                any_monkey_detected = False
+                for cid in [1, 2]:
+                    with _result_locks[cid]:
+                        res = last_results[cid]
+                        if res and res.get("debounced", False):
+                            any_monkey_detected = True
+
+                if any_monkey_detected:
+                    log_msg(f"[Cam {self.cam_id}] MONKEY ALERT CONFIRMED (Conf={best_monkey_conf:.2f})")
                     send_arduino(b"1", "MONKEY DETECTED")
                     play_alert_sound()
+                    # ── Telegram Alert (rate-limited per camera) ──────────────
+                    if debounced_alert:
+                        with _phone_lock:
+                            chats = list(camera_phones.get(self.cam_id, []))
+                        if chats:
+                            now = time.time()
+                            if now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS:
+                                last_sms_time[self.cam_id] = now
+                                
+                                # Capture current frame as JPEG for Telegram photo snapshot
+                                image_bytes = None
+                                with _frame_locks[self.cam_id]:
+                                    current_frame = latest_frames[self.cam_id]
+                                    if current_frame is not None:
+                                        success, encoded_img = cv2.imencode('.jpg', current_frame)
+                                        if success:
+                                            image_bytes = encoded_img.tobytes()
+                                            
+                                for chat_id in chats:
+                                    threading.Thread(
+                                        target=send_telegram_alert,
+                                        args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
+                                        daemon=True
+                                    ).start()
                 else:
                     if monkey_detected_in_frame:
-                        log_msg(f"Monkey seen (Debouncing count={consecutive_monkey_count}/{DEBOUNCE_FRAMES})")
+                        log_msg(f"[Cam {self.cam_id}] Monkey seen (Debouncing count={consecutive_monkey_count}/{DEBOUNCE_FRAMES})")
                     send_arduino(b"0", "clear/no monkey")
                     stop_alert_sound()
 
             except Exception as exc:
-                log_msg(f"Inference processing error: {exc}")
+                log_msg(f"[Cam {self.cam_id}] Inference processing error: {exc}")
 
-detection_thread = DetectionThread()
+detection_threads = {
+    1: DetectionThread(cam_id=1),
+    2: DetectionThread(cam_id=2)
+}
 
 # ---------------------------------------------------------------------------
 # MJPEG Frame Generator
 # ---------------------------------------------------------------------------
-def generate_frames():
-    while running:
-        with _frame_lock:
-            frame = latest_frame
+def generate_frames(cam_id: int):
+    while running_cams[cam_id]:
+        with _frame_locks[cam_id]:
+            frame = latest_frames[cam_id]
 
         if frame is None:
             time.sleep(0.03)
@@ -403,8 +520,8 @@ def generate_frames():
 
         display = frame.copy()
 
-        with _result_lock:
-            result = last_result
+        with _result_locks[cam_id]:
+            result = last_results[cam_id]
 
         if result:
             debounced = result.get("debounced", False)
@@ -467,39 +584,53 @@ def generate_frames():
 def index():
     return render_template("index.html")
 
-@app.route("/start", methods=["POST"])
-def start():
-    global running, last_result, _detection_state
-    if running:
-        return "Already running", 200
+@app.route("/start/<int:cam_id>", methods=["POST"])
+def start(cam_id):
+    if cam_id not in [1, 2]:
+        return "Invalid camera ID", 400
+        
+    if running_cams[cam_id]:
+        return f"Camera {cam_id} already running", 200
 
-    if not camera_thread.open():
-        return "Failed to open webcam", 500
+    if not camera_threads[cam_id].open():
+        return f"Failed to open webcam {cam_id}", 500
 
-    last_result      = None
+    with _result_locks[cam_id]:
+        last_results[cam_id] = None
+        
+    global _detection_state
     _detection_state = None
-    running          = True
-    log_msg("Detection system started via /start endpoint")
-    return "Started", 200
+    running_cams[cam_id] = True
+    log_msg(f"[Cam {cam_id}] Detection system started via /start endpoint")
+    return f"Camera {cam_id} Started", 200
 
-@app.route("/stop", methods=["POST"])
-def stop():
-    global running
-    if not running:
-        return "Not running", 200
+@app.route("/stop/<int:cam_id>", methods=["POST"])
+def stop(cam_id):
+    if cam_id not in [1, 2]:
+        return "Invalid camera ID", 400
+        
+    if not running_cams[cam_id]:
+        return f"Camera {cam_id} not running", 200
 
-    running = False
+    running_cams[cam_id] = False
     time.sleep(0.15)
-    camera_thread.release()
-    stop_alert_sound()
-    send_arduino(b"0", "relay OFF on stop")
-    log_msg("Detection system stopped via /stop endpoint")
-    return "Stopped", 200
+    camera_threads[cam_id].release()
+    
+    # If all cameras are stopped, turn off the alarm
+    if not any(running_cams.values()):
+        stop_alert_sound()
+        send_arduino(b"0", "relay OFF on stop")
+        
+    log_msg(f"[Cam {cam_id}] Detection system stopped via /stop endpoint")
+    return f"Camera {cam_id} Stopped", 200
 
-@app.route("/video_feed")
-def video_feed():
+@app.route("/video_feed/<int:cam_id>")
+def video_feed(cam_id):
+    if cam_id not in [1, 2]:
+        return "Invalid camera ID", 400
+        
     return Response(
-        generate_frames(),
+        generate_frames(cam_id),
         mimetype="multipart/x-mixed-replace; boundary=frame",
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -512,27 +643,69 @@ def video_feed():
 @app.route("/status")
 def status():
     """Health-check endpoint for the frontend to poll."""
-    with _result_lock:
-        result = last_result
-    monkey_alert = False
-    confidence = 0.0
-    if result:
-        monkey_alert = result.get("debounced", False)
-        confidence = result.get("best_conf", 0.0)
-    return jsonify({
-        "running": running,
-        "monkey_alert": monkey_alert,
-        "confidence": round(confidence * 100, 1),
-        "camera_online": running,
-    })
+    response_data = {}
+    
+    for cid in [1, 2]:
+        with _result_locks[cid]:
+            result = last_results[cid]
+        monkey_alert = False
+        confidence = 0.0
+        if result:
+            monkey_alert = result.get("debounced", False)
+            confidence = result.get("best_conf", 0.0)
+        with _phone_lock:
+            phones = list(camera_phones.get(cid, []))
+            
+        response_data[f"cam{cid}"] = {
+            "running": running_cams[cid],
+            "monkey_alert": monkey_alert,
+            "confidence": round(confidence * 100, 1),
+            "camera_online": running_cams[cid],
+            "phones": phones,
+        }
+    
+    return jsonify(response_data)
+
+@app.route("/set_phone/<int:cam_id>", methods=["POST"])
+def set_phone(cam_id):
+    """Add a phone number to the alert list for a given camera."""
+    from flask import request
+    if cam_id not in [1, 2]:
+        return jsonify({"error": "Invalid camera ID"}), 400
+    data = request.get_json()
+    if not data or "phone" not in data:
+        return jsonify({"error": "Missing 'phone' field in JSON body"}), 400
+    phone = str(data["phone"]).strip()
+    if not phone:
+        return jsonify({"error": "Phone number cannot be empty"}), 400
+    with _phone_lock:
+        if phone not in camera_phones[cam_id]:
+            camera_phones[cam_id].append(phone)
+        phones = list(camera_phones[cam_id])
+    log_msg(f"[Cam {cam_id}] Alert phone added: {phone} (total: {len(phones)})")
+    return jsonify({"success": True, "cam_id": cam_id, "phones": phones})
+
+@app.route("/remove_phone/<int:cam_id>/<int:idx>", methods=["POST"])
+def remove_phone(cam_id, idx):
+    """Remove a phone number by index from the alert list for a given camera."""
+    if cam_id not in [1, 2]:
+        return jsonify({"error": "Invalid camera ID"}), 400
+    with _phone_lock:
+        phones = camera_phones[cam_id]
+        if idx < 0 or idx >= len(phones):
+            return jsonify({"error": "Index out of range"}), 400
+        removed = phones.pop(idx)
+        phones_copy = list(phones)
+    log_msg(f"[Cam {cam_id}] Alert phone removed: {removed} (remaining: {len(phones_copy)})")
+    return jsonify({"success": True, "cam_id": cam_id, "phones": phones_copy})
 
 # ---------------------------------------------------------------------------
 # Graceful Shutdown Handler
 # ---------------------------------------------------------------------------
 def _shutdown(signum=None, frame_arg=None):
-    global running
-    running = False
-    camera_thread.release()
+    for cid in [1, 2]:
+        running_cams[cid] = False
+        camera_threads[cid].release()
     stop_alert_sound()
     if arduino:
         try:
@@ -553,16 +726,19 @@ atexit.register(_shutdown)
 # Program Entry Point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # Auto-start camera and detection on boot so frontend gets a live stream immediately
-    if camera_thread.open():
-        last_result      = None
-        _detection_state = None
-        running          = True
-        log_msg("Camera auto-started on boot.")
-    else:
-        log_msg("WARNING: Camera auto-start failed. POST /start when camera is ready.")
+    # Auto-start cameras and detection on boot so frontend gets a live stream immediately
+    for cid in [1, 2]:
+        if camera_threads[cid].open():
+            with _result_locks[cid]:
+                last_results[cid] = None
+            _detection_state = None
+            running_cams[cid] = True
+            log_msg(f"Camera {cid} auto-started on boot.")
+        else:
+            log_msg(f"WARNING: Camera {cid} auto-start failed. POST /start/{cid} when camera is ready.")
 
-    camera_thread.start()
-    detection_thread.start()
+        camera_threads[cid].start()
+        detection_threads[cid].start()
+        
     log_msg("Starting Flask application server on http://127.0.0.1:5000")
     app.run(debug=False, use_reloader=False, host="0.0.0.0", port=5000, threaded=True)

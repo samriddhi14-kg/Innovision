@@ -1626,24 +1626,32 @@
               }
             }
 
-            // Update Meta data (Confidence and Light)
+            // Update Meta data (Confidence, Last Detection, and Light)
             const metaVals = card.querySelectorAll('.camera-meta strong');
             if (metaVals.length >= 4) {
+              const lastDetTime = camData.last_detection || localStorage.getItem(`khetrakshak_last_detection_${camId}`) || 'No detections today';
+              if (camData.last_detection) {
+                localStorage.setItem(`khetrakshak_last_detection_${camId}`, camData.last_detection);
+              }
               if (!camData.running) {
                 metaVals[0].textContent = '—';
                 metaVals[0].className = '';
+                metaVals[2].textContent = lastDetTime;
                 metaVals[3].textContent = '● Offline';
                 metaVals[3].className = '';
               } else if (camData.monkey_alert) {
                 metaVals[0].textContent = camData.confidence + '%';
                 metaVals[0].className = 'attention';
                 const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                metaVals[2].textContent = `Today, ${timeStr}`;
+                const currentDet = `Today, ${timeStr}`;
+                metaVals[2].textContent = camData.last_detection || currentDet;
+                localStorage.setItem(`khetrakshak_last_detection_${camId}`, metaVals[2].textContent);
                 metaVals[3].textContent = '● Detected';
                 metaVals[3].className = 'attention';
               } else {
                 metaVals[0].textContent = '—';
                 metaVals[0].className = '';
+                metaVals[2].textContent = lastDetTime;
                 metaVals[3].textContent = '● Standby · Safe';
                 metaVals[3].className = 'safe';
               }
@@ -1709,6 +1717,18 @@
       }
     }
 
+    // Initialize last detection times from localStorage immediately on load
+    [1, 2].forEach(camId => {
+      const card = document.querySelectorAll('.camera-card')[camId - 1];
+      if (card) {
+        const metaVals = card.querySelectorAll('.camera-meta strong');
+        const saved = localStorage.getItem(`khetrakshak_last_detection_${camId}`);
+        if (metaVals && metaVals.length >= 3 && saved) {
+          metaVals[2].textContent = saved;
+        }
+      }
+    });
+
     // Initial connect attempt + poll loop
     tryStartFlask();
     pollStatus();
@@ -1723,11 +1743,22 @@
     // ── Supabase Realtime Listener ─────────────────────────────────────────
     if (window.KhetRakshakAPI) {
       window.KhetRakshakAPI.subscribeToDetections((newDet) => {
+        const timeStr = new Date(newDet.created_at || Date.now()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const detStr = `Today, ${timeStr}`;
+        const dev = String(newDet.device_id || '');
+        const camId = dev.includes('2') ? 2 : 1;
+        localStorage.setItem(`khetrakshak_last_detection_${camId}`, detStr);
+        const card = document.querySelectorAll('.camera-card')[camId - 1];
+        if (card) {
+          const metaVals = card.querySelectorAll('.camera-meta strong');
+          if (metaVals && metaVals.length >= 3) {
+            metaVals[2].textContent = detStr;
+          }
+        }
         const list = document.querySelector('.activity-list');
         if (list) {
           const item = document.createElement('div');
           item.className = 'activity';
-          const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
           item.innerHTML = `
             <span class="activity-time">${timeStr}</span>
             <i class="activity-dot" style="background:#d8675f"></i>

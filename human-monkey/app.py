@@ -26,6 +26,9 @@ from typing import List, Dict, Tuple, Optional
 # Fix duplicate OpenMP runtime issue on Windows
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import torch
 import serial
 import pygame
@@ -202,66 +205,114 @@ def stop_alert_sound() -> None:
 # ---------------------------------------------------------------------------
 # Telegram Bot Alert System (Text & Photo Snapshot Notifications)
 # ---------------------------------------------------------------------------
-TELEGRAM_BOT_TOKEN = os.environ.get("8871543938:AAGhPewd0ivJchVLrrUzgk_bEWauBe9RYZg", "").strip()
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+DEFAULT_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
 def send_telegram_alert(chat_id: str, cam_id: int, confidence: float, image_bytes: Optional[bytes] = None) -> None:
-    """Send an instant Telegram alert (text + photo snapshot) to the given Chat ID."""
+    """Send a Telegram alert (text + optional photo) to a specific chat ID.
+    Args:
+        chat_id: Telegram chat identifier (e.g., user or group ID).
+        cam_id: Camera identifier.
+        confidence: Detection confidence (0‑1).
+        image_bytes: JPEG bytes of the snapshot (optional).
+    """
     if not TELEGRAM_BOT_TOKEN:
-        log_msg(f"[Telegram Alert] (No BOT_TOKEN set - Simulated to Chat ID {chat_id}): MONKEY DETECTED by Camera 0{cam_id} ({confidence*100:.1f}%)")
+        log_msg(f"[Telegram] No BOT_TOKEN – simulated alert to {chat_id} (Camera {cam_id})")
         return
-        
-    caption = f"🚨 *khetRakshak MONKEY ALERT!* 🐒\n\n📷 *Camera:* Camera 0{cam_id}\n🎯 *Confidence:* {round(confidence * 100, 1)}%\n⏰ *Time:* {datetime.datetime.now().strftime('%I:%M %p')}\n📍 *Location:* Protected Farm Area"
-    
+
+    caption = (
+        f"🚨 *khetRakshak MONKEY ALERT!* 🐒\n"
+        f"\n📷 *Camera:* Camera 0{cam_id}\n"
+        f"🎯 *Confidence:* {round(confidence * 100, 1)}%\n"
+        f"⏰ *Time:* {datetime.datetime.now().strftime('%I:%M %p')}\n"
+        f"📍 *Location:* Protected Farm Area"
+    )
     try:
-        import urllib.request
-        import json
-        
+        import requests
         if image_bytes:
-            boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
-            body = []
-            body.append(f'--{boundary}'.encode())
-            body.append(f'Content-Disposition: form-data; name="chat_id"'.encode())
-            body.append(b'')
-            body.append(str(chat_id).encode())
-            
-            body.append(f'--{boundary}'.encode())
-            body.append(f'Content-Disposition: form-data; name="caption"'.encode())
-            body.append(b'')
-            body.append(caption.encode())
-            
-            body.append(f'--{boundary}'.encode())
-            body.append(f'Content-Disposition: form-data; name="parse_mode"'.encode())
-            body.append(b'')
-            body.append(b'Markdown')
-            
-            body.append(f'--{boundary}'.encode())
-            body.append(f'Content-Disposition: form-data; name="photo"; filename="monkey.jpg"'.encode())
-            body.append(b'Content-Type: image/jpeg')
-            body.append(b'')
-            body.append(image_bytes)
-            
-            body.append(f'--{boundary}--'.encode())
-            body.append(b'')
-            
-            payload = b'\r\n'.join(body)
-            req = urllib.request.Request(
-                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto",
-                data=payload,
-                headers={'Content-Type': f'multipart/form-data; boundary={boundary}'}
-            )
-            urllib.request.urlopen(req, timeout=10)
-            log_msg(f"[Telegram] Sent Photo Alert to Chat ID {chat_id} for Camera 0{cam_id}")
+            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
+            files = {"photo": ("monkey.jpg", image_bytes, "image/jpeg")}
+            data = {"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}
+            resp = requests.post(url, data=data, files=files, timeout=10)
         else:
-            data = json.dumps({"chat_id": chat_id, "text": caption, "parse_mode": "Markdown"}).encode('utf-8')
-            req = urllib.request.Request(
-                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-                data=data,
-                headers={'Content-Type': 'application/json'}
-            )
-            urllib.request.urlopen(req, timeout=10)
-            log_msg(f"[Telegram] Sent Text Alert to Chat ID {chat_id} for Camera 0{cam_id}")
+            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+            data = {"chat_id": chat_id, "text": caption, "parse_mode": "Markdown"}
+            resp = requests.post(url, json=data, timeout=10)
+        if resp.status_code == 200:
+            log_msg(f"[Telegram] Sent alert to {chat_id} (Camera {cam_id})")
+        else:
+            log_msg(f"[Telegram] API error {resp.status_code}: {resp.text}")
     except Exception as exc:
-        log_msg(f"[Telegram Error] Failed to send alert to {chat_id}: {exc}")
+        log_msg(f"[Telegram] Connection error: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Supabase Detection Logger
+# ---------------------------------------------------------------------------
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY", "").strip()
+last_detection_times: Dict[int, Optional[str]] = {1: None, 2: None}
+
+def record_detection_supabase(cam_id: int, confidence: float, image_bytes: Optional[bytes] = None) -> None:
+    """Save monkey detection event to Supabase DB asynchronously."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return
+    try:
+        import requests
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+        }
+        device_name = f"Camera 0{cam_id}"
+        payload = {
+            "device_id": device_name,
+            "object_class": "monkey",
+            "confidence": round(float(confidence) * 100, 1),
+            "metadata": {
+                "cam_id": cam_id,
+                "timestamp": datetime.datetime.now().isoformat(),
+                "location": "East Boundary" if cam_id == 1 else "North Field"
+            }
+        }
+        url = f"{SUPABASE_URL}/rest/v1/detections"
+        resp = requests.post(url, json=payload, headers=headers, timeout=5)
+        if resp.status_code in (200, 201):
+            log_msg(f"[Supabase] Logged monkey detection for {device_name} (Conf: {payload['confidence']}%)")
+        else:
+            log_msg(f"[Supabase] Detection insert returned {resp.status_code}: {resp.text}")
+    except Exception as exc:
+        log_msg(f"[Supabase] Logging error: {exc}")
+
+def load_last_detections_from_supabase() -> None:
+    """Fetch the latest detection timestamp from Supabase on startup."""
+    global last_detection_times
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return
+    try:
+        import requests
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
+        url = f"{SUPABASE_URL}/rest/v1/detections?order=created_at.desc&limit=10"
+        resp = requests.get(url, headers=headers, timeout=5)
+        if resp.status_code == 200:
+            records = resp.json()
+            for rec in records:
+                dev = str(rec.get("device_id", ""))
+                created = rec.get("created_at")
+                cid = 1 if "1" in dev else (2 if "2" in dev else 1)
+                if last_detection_times[cid] is None and created:
+                    try:
+                        dt = datetime.datetime.fromisoformat(created.replace("Z", "+00:00"))
+                        last_detection_times[cid] = dt.strftime("Today, %I:%M %p")
+                    except Exception:
+                        last_detection_times[cid] = created
+            log_msg(f"[Supabase] Synced previous detection history: {last_detection_times}")
+    except Exception as exc:
+        log_msg(f"[Supabase] Initial sync skipped: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -311,12 +362,15 @@ running_cams = {1: False, 2: False}
 _frame_locks = {1: threading.Lock(), 2: threading.Lock()}
 _result_locks = {1: threading.Lock(), 2: threading.Lock()}
 
-# SMS alert phone numbers per camera — now a list for multiple recipients
-camera_phones: Dict[int, List[str]] = {1: [], 2: []}
+# Telegram alert chat IDs / phone numbers per camera
+camera_phones: Dict[int, List[str]] = {
+    1: [DEFAULT_CHAT_ID] if DEFAULT_CHAT_ID else [],
+    2: [DEFAULT_CHAT_ID] if DEFAULT_CHAT_ID else []
+}
 _phone_lock = threading.Lock()
 
-# Rate-limiting: stores the last time an SMS was sent per camera (unix timestamp)
-SMS_COOLDOWN_SECONDS = 300  # 5 minutes between alerts
+# Rate-limiting: stores the last time an alert was sent per camera (unix timestamp)
+SMS_COOLDOWN_SECONDS = 15  # 15 seconds cooldown for responsive testing
 last_sms_time: Dict[int, float] = {1: 0.0, 2: 0.0}
 
 # ---------------------------------------------------------------------------
@@ -468,30 +522,42 @@ class DetectionThread(threading.Thread):
                     log_msg(f"[Cam {self.cam_id}] MONKEY ALERT CONFIRMED (Conf={best_monkey_conf:.2f})")
                     send_arduino(b"1", "MONKEY DETECTED")
                     play_alert_sound()
-                    # ── Telegram Alert (rate-limited per camera) ──────────────
+                    # ── Telegram Alert & Supabase Logging (rate-limited per camera) ──
                     if debounced_alert:
+                        now = time.time()
+                        det_time_str = datetime.datetime.now().strftime("Today, %I:%M %p")
+                        last_detection_times[self.cam_id] = det_time_str
+                        
+                        # Capture current frame as JPEG for Telegram photo & Supabase snapshot
+                        image_bytes = None
+                        with _frame_locks[self.cam_id]:
+                            current_frame = latest_frames[self.cam_id]
+                            if current_frame is not None:
+                                success, encoded_img = cv2.imencode('.jpg', current_frame)
+                                if success:
+                                    image_bytes = encoded_img.tobytes()
+
+                        # 1. Log detection to Supabase DB asynchronously
+                        threading.Thread(
+                            target=record_detection_supabase,
+                            args=(self.cam_id, best_monkey_conf, image_bytes),
+                            daemon=True
+                        ).start()
+
+                        # 2. Dispatch Telegram alert (with cooldown)
                         with _phone_lock:
                             chats = list(camera_phones.get(self.cam_id, []))
-                        if chats:
-                            now = time.time()
-                            if now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS:
-                                last_sms_time[self.cam_id] = now
-                                
-                                # Capture current frame as JPEG for Telegram photo snapshot
-                                image_bytes = None
-                                with _frame_locks[self.cam_id]:
-                                    current_frame = latest_frames[self.cam_id]
-                                    if current_frame is not None:
-                                        success, encoded_img = cv2.imencode('.jpg', current_frame)
-                                        if success:
-                                            image_bytes = encoded_img.tobytes()
-                                            
-                                for chat_id in chats:
-                                    threading.Thread(
-                                        target=send_telegram_alert,
-                                        args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
-                                        daemon=True
-                                    ).start()
+                            if not chats and DEFAULT_CHAT_ID:
+                                chats = [DEFAULT_CHAT_ID]
+
+                        if chats and (now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS):
+                            last_sms_time[self.cam_id] = now
+                            for chat_id in chats:
+                                threading.Thread(
+                                    target=send_telegram_alert,
+                                    args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
+                                    daemon=True
+                                ).start()
                 else:
                     if monkey_detected_in_frame:
                         log_msg(f"[Cam {self.cam_id}] Monkey seen (Debouncing count={consecutive_monkey_count}/{DEBOUNCE_FRAMES})")
@@ -662,6 +728,7 @@ def status():
             "confidence": round(confidence * 100, 1),
             "camera_online": running_cams[cid],
             "phones": phones,
+            "last_detection": last_detection_times.get(cid)
         }
     
     return jsonify(response_data)
@@ -716,7 +783,8 @@ def _shutdown(signum=None, frame_arg=None):
         except Exception:
             pass
     log_msg("Application shutdown complete.")
-    sys.exit(0)
+    if signum is not None:
+        sys.exit(0)
 
 for _sig in (signal.SIGINT, signal.SIGTERM):
     signal.signal(_sig, _shutdown)
@@ -726,6 +794,9 @@ atexit.register(_shutdown)
 # Program Entry Point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    # Sync previous detection history from Supabase if online
+    load_last_detections_from_supabase()
+
     # Auto-start cameras and detection on boot so frontend gets a live stream immediately
     for cid in [1, 2]:
         if camera_threads[cid].open():

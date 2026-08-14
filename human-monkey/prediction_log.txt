@@ -8406,3 +8406,57 @@ Model Summary: 314 layers, 36481772 parameters, 6194944 gradients, 103.2 GFLOPS
 [2026-08-14 17:08:04] [Cam 2] DetectionThread running
 [2026-08-14 17:08:04] Starting Flask application server on http://127.0.0.1:5000
 [2026-08-14 17:08:09] [Cam 2] Failed to open webcam at index 1
+[2026-08-14 18:00:25] Loading YOLO model from: my_model\best.pt
+[2026-08-14 18:00:25] YOLO model loaded successfully.
+[2026-08-14 18:00:25] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-14 18:00:25] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-14 18:00:25] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-14 18:00:26] Windows MCI open code: 277
+[2026-08-14 18:00:26] Audio engine initialized in Beep mode.
+[2026-08-14 18:00:26] Arduino connection failed on COM9: could not open port 'COM9': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2)
+[2026-08-14 18:00:26] [Supabase] Initial sync skipped: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections?order=created_at.desc&limit=10 (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:00:27] [Cam 1] Webcam opened successfully on index 0
+[2026-08-14 18:00:27] Camera 1 auto-started on boot.
+[2026-08-14 18:00:27] [Cam 1] CameraThread running
+[2026-08-14 18:00:27] [Cam 1] DetectionThread running
+[2026-08-14 18:00:28] [Cam 2] Failed to open webcam at index 1
+[2026-08-14 18:00:28] WARNING: Camera 2 auto-start failed. POST /start/2 when camera is ready.
+[2026-08-14 18:00:28] [Cam 2] CameraThread running
+[2026-08-14 18:00:28] [Cam 2] DetectionThread running
+[2026-08-14 18:00:28] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-14 18:00:48] Loading YOLO model from: my_model\best.pt
+[2026-08-14 18:00:48] YOLO model loaded successfully.
+[2026-08-14 18:00:48] Parsed class names from my_model\data.yaml: {0: 'Monkey', 1: 'Not monkey'}
+[2026-08-14 18:00:48] Strict Monkey Class IDs: [0] -> ['Monkey']
+[2026-08-14 18:00:50] Pygame mixer sound load skipped: Unrecognized audio format
+[2026-08-14 18:00:50] Windows MCI open code: 277
+[2026-08-14 18:00:50] Audio engine initialized in Beep mode.
+[2026-08-14 18:00:50] Arduino connection failed on COM9: could not open port 'COM9': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2)
+[2026-08-14 18:00:50] [Supabase] Initial sync skipped: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections?order=created_at.desc&limit=10 (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:00:51] [Cam 1] Webcam opened successfully on index 0
+[2026-08-14 18:00:51] Camera 1 auto-started on boot.
+[2026-08-14 18:00:51] [Cam 1] CameraThread running
+[2026-08-14 18:00:51] [Cam 1] DetectionThread running
+[2026-08-14 18:00:51] [Cam 2] Failed to open webcam at index 1
+[2026-08-14 18:00:51] WARNING: Camera 2 auto-start failed. POST /start/2 when camera is ready.
+[2026-08-14 18:00:51] [Cam 2] CameraThread running
+[2026-08-14 18:00:51] [Cam 2] DetectionThread running
+[2026-08-14 18:00:51] Starting Flask application server on http://127.0.0.1:5000
+[2026-08-14 18:00:55] [Cam 2] Failed to open webcam at index 1
+[2026-08-14 18:01:16] [Cam 1] Monkey seen (Debouncing count=1/3)
+[2026-08-14 18:01:16] [Cam 1] Monkey seen (Debouncing count=2/3)
+[2026-08-14 18:01:16] [Cam 1] MONKEY ALERT CONFIRMED (Conf=0.86)
+[2026-08-14 18:01:17] [Supabase] Logging error: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:01:17] [Cam 1] MONKEY ALERT CONFIRMED (Conf=0.90)
+[2026-08-14 18:01:17] [Supabase] Logging error: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:01:17] Audio alert stopped
+[2026-08-14 18:01:17] [Cam 1] Monkey seen (Debouncing count=1/3)
+[2026-08-14 18:01:18] [Cam 1] Monkey seen (Debouncing count=2/3)
+[2026-08-14 18:01:18] [Cam 1] MONKEY ALERT CONFIRMED (Conf=0.75)
+[2026-08-14 18:01:18] [Supabase] Logging error: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:01:19] [Cam 1] MONKEY ALERT CONFIRMED (Conf=0.77)
+[2026-08-14 18:01:19] [Supabase] Logging error: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:01:19] [Cam 1] MONKEY ALERT CONFIRMED (Conf=0.69)
+[2026-08-14 18:01:19] [Supabase] Logging error: HTTPSConnectionPool(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Max retries exceeded with url: /rest/v1/detections (Caused by NameResolutionError("HTTPSConnection(host='desbzybcnxhawjltxrjm.supabase.co', port=443): Failed to resolve 'desbzybcnxhawjltxrjm.supabase.co' ([Errno 11001] getaddrinfo failed)"))
+[2026-08-14 18:01:19] Audio alert stopped
+[2026-08-14 18:01:30] [Telegram] Sent alert to 6750834913 (Camera 1)

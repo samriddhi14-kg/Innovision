@@ -69,30 +69,40 @@ def log_msg(msg: str) -> None:
 # ---------------------------------------------------------------------------
 # Model & Class Configuration
 # ---------------------------------------------------------------------------
-MODEL_PATH      = os.path.join("my_model", "best.pt")
+# Prioritize user requested model: my_model/best.pt
+env_model = os.getenv("MODEL_PATH", "").strip()
+MODEL_CANDIDATES = [
+    os.path.join("my_model", "best.pt"),
+    env_model if env_model else "",
+    os.path.join("my_model", "new_best.pt"),
+    os.path.join("my_model", "my_model.pt"),
+]
+
+MODEL_PATH = None
+for candidate in MODEL_CANDIDATES:
+    if candidate and os.path.exists(candidate):
+        MODEL_PATH = candidate
+        break
+
+if not MODEL_PATH:
+    log_msg("ERROR: No valid model file found (checked new_best.pt, best.pt, my_model.pt)")
+    sys.exit(1)
+
 DATA_YAML_PATH  = os.path.join("my_model", "data.yaml")
-CONF_THRES      = 0.40   # Minimum confidence threshold for detection
+CONF_THRES      = float(os.getenv("CONFIDENCE_THRESHOLD", "0.40"))
 DETECT_EVERY    = 3      # Run inference every Nth grabbed frame
 DEBOUNCE_FRAMES = 3      # Consecutive detection frames required for alert (Time-in-Sight)
 
 log_msg(f"Loading YOLO model from: {MODEL_PATH}")
-
-if not os.path.exists(MODEL_PATH):
-    # Fallback check
-    alt_path = os.path.join("my_model", "my_model.pt")
-    if os.path.exists(alt_path):
-        MODEL_PATH = alt_path
-        log_msg(f"Primary weights missing, using fallback: {MODEL_PATH}")
-    else:
-        log_msg(f"ERROR: Model file not found at {MODEL_PATH}")
-        sys.exit(1)
-
 model = YOLO(MODEL_PATH)
 log_msg("YOLO model loaded successfully.")
 
-# Parse class names dynamically from data.yaml or model.names
+# Parse class names: prioritize model.names embedded in model weights
 class_names: Dict[int, str] = {}
-if os.path.exists(DATA_YAML_PATH):
+if hasattr(model, "names") and model.names:
+    class_names = {int(k): str(v) for k, v in model.names.items()}
+    log_msg(f"Loaded class names from model.names: {class_names}")
+elif os.path.exists(DATA_YAML_PATH):
     try:
         with open(DATA_YAML_PATH, "r", encoding="utf-8") as f:
             yaml_data = yaml.safe_load(f)
@@ -107,18 +117,19 @@ if os.path.exists(DATA_YAML_PATH):
         log_msg(f"Warning: Failed to parse {DATA_YAML_PATH}: {exc}")
 
 if not class_names:
-    class_names = model.names if hasattr(model, "names") else {0: "Monkey", 1: "Not monkey"}
-    log_msg(f"Using model default class names: {class_names}")
+    class_names = {0: "monkey", 1: "not_monkey"}
+    log_msg(f"Using default class names: {class_names}")
 
-# Identify Monkey class IDs strictly (matching 'monkey', excluding 'not monkey')
+# Strictly identify Monkey class IDs
+# Must contain 'monkey' but NOT contain any negation like 'not', 'non', 'no_', 'human', 'person'
 MONKEY_CLASS_IDS: List[int] = []
 for cid, cname in class_names.items():
-    cname_lower = str(cname).lower().strip()
-    if "monkey" in cname_lower and "not monkey" not in cname_lower:
+    cname_clean = str(cname).lower().strip().replace("-", " ")
+    is_negation = any(neg in cname_clean for neg in ["not", "non", "no_", "human", "person", "background"])
+    if "monkey" in cname_clean and not is_negation:
         MONKEY_CLASS_IDS.append(cid)
 
 if not MONKEY_CLASS_IDS:
-    # Default to class ID 0 if name parsing didn't find explicit 'Monkey'
     MONKEY_CLASS_IDS = [0]
 
 log_msg(f"Strict Monkey Class IDs: {MONKEY_CLASS_IDS} -> {[class_names.get(i) for i in MONKEY_CLASS_IDS]}")
@@ -519,7 +530,8 @@ class DetectionThread(threading.Thread):
                 monkey_detected_in_frame = False
                 best_monkey_conf = 0.0
 
-                if len(results) > 0 and len(results[0].boxes) > 0:
+                # 1. Object Detection Model (results[0].boxes)
+                if results and getattr(results[0], "boxes", None) is not None and len(results[0].boxes) > 0:
                     det_boxes = results[0].boxes
                     for box in det_boxes:
                         xyxy = box.xyxy[0].cpu().numpy().astype(int)
@@ -541,6 +553,27 @@ class DetectionThread(threading.Thread):
                             monkey_detected_in_frame = True
                             if conf > best_monkey_conf:
                                 best_monkey_conf = conf
+
+                # 2. Image Classification Model (results[0].probs) - e.g. best.pt
+                elif results and getattr(results[0], "probs", None) is not None:
+                    probs = results[0].probs
+                    top1_id = int(probs.top1)
+                    top1_conf = float(probs.top1conf.item())
+                    top1_name = class_names.get(top1_id, f"class_{top1_id}")
+                    is_monkey = (top1_id in MONKEY_CLASS_IDS)
+
+                    h, w = frame.shape[:2]
+                    boxes_summary.append({
+                        "bbox": (12, 12, w - 12, h - 12),
+                        "conf": top1_conf,
+                        "cls_id": top1_id,
+                        "cls_name": top1_name,
+                        "is_monkey": is_monkey
+                    })
+
+                    if is_monkey and top1_conf >= CONF_THRES:
+                        monkey_detected_in_frame = True
+                        best_monkey_conf = top1_conf
 
                 # Temporal Debouncing Logic (Time-in-Sight filter)
                 if monkey_detected_in_frame:
@@ -569,37 +602,37 @@ class DetectionThread(threading.Thread):
                             any_monkey_detected = True
 
                 if any_monkey_detected:
-                    log_msg(f"[Cam {self.cam_id}] MONKEY ALERT CONFIRMED (Conf={best_monkey_conf:.2f})")
                     send_arduino(b"1", "MONKEY DETECTED")
                     play_alert_sound()
-                    # Immediate Telegram alert (subject to cooldown)
-                    now = time.time()
-                    # Capture current frame as JPEG for Telegram photo
-                    image_bytes = None
-                    with _frame_locks[self.cam_id]:
-                        current_frame = latest_frames[self.cam_id]
-                        if current_frame is not None:
-                            success, encoded_img = cv2.imencode('.jpg', current_frame)
-                            if success:
-                                image_bytes = encoded_img.tobytes()
-                    # Prepare chat list
-                    with _phone_lock:
-                        chats = list(camera_phones.get(self.cam_id, []))
-                        if not chats and DEFAULT_CHAT_ID:
-                            chats = [DEFAULT_CHAT_ID]
-                    if chats and (now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS):
-                        last_sms_time[self.cam_id] = now
-                        for chat_id in chats:
-                            threading.Thread(
-                                target=send_telegram_alert,
-                                args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
-                                daemon=True
-                            ).start()
-                    # Supabase logging (only on debounced alert)
-                    if debounced_alert:
+
+                    # Send Telegram Alert and Supabase log ONLY when a monkey is confirmed on THIS camera
+                    if debounced_alert and monkey_detected_in_frame and best_monkey_conf > 0.0:
+                        log_msg(f"[Cam {self.cam_id}] MONKEY ALERT CONFIRMED (Conf={best_monkey_conf:.2f})")
+                        now = time.time()
+                        # Capture current frame as JPEG for Telegram photo
+                        image_bytes = None
+                        with _frame_locks[self.cam_id]:
+                            current_frame = latest_frames[self.cam_id]
+                            if current_frame is not None:
+                                success, encoded_img = cv2.imencode('.jpg', current_frame)
+                                if success:
+                                    image_bytes = encoded_img.tobytes()
+                        # Prepare chat list
+                        with _phone_lock:
+                            chats = list(camera_phones.get(self.cam_id, []))
+                            if not chats and DEFAULT_CHAT_ID:
+                                chats = [DEFAULT_CHAT_ID]
+                        if chats and (now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS):
+                            last_sms_time[self.cam_id] = now
+                            for chat_id in chats:
+                                threading.Thread(
+                                    target=send_telegram_alert,
+                                    args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
+                                    daemon=True
+                                ).start()
+                        # Supabase logging (only on debounced monkey alert)
                         det_time_str = datetime.datetime.now().strftime("Today, %I:%M %p")
                         last_detection_times[self.cam_id] = det_time_str
-                        # Log detection to Supabase DB asynchronously
                         threading.Thread(
                             target=record_detection_supabase,
                             args=(self.cam_id, best_monkey_conf, image_bytes),
@@ -651,8 +684,8 @@ def generate_frames(cam_id: int):
                     color = (0, 255, 0) if debounced else (0, 255, 255)
                     label = f"🐒 {cname}: {conf * 100:.1f}%"
                 else:
-                    color = (180, 180, 180)
-                    label = f"{cname}: {conf * 100:.1f}%"
+                    color = (220, 180, 50)
+                    label = f"👤 {cname}: {conf * 100:.1f}%"
 
                 # Draw bounding box
                 cv2.rectangle(display, (x1, y1), (x2, y2), color, 2)

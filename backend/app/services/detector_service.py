@@ -25,12 +25,12 @@ except ImportError:
 try:
     from app.config.config import Config
     _cfg = Config()
-    MODEL_PATH = getattr(_cfg, "YOLO_MODEL_PATH", "models/best.pt")
+    MODEL_PATH = getattr(_cfg, "YOLO_MODEL_PATH", "models/new_best.pt")
     CAMERA_INDEX = getattr(_cfg, "CAMERA_INDEX", 1)
     CONF_THRESHOLD = getattr(_cfg, "CONFIDENCE_THRESHOLD", 0.5)
 except Exception:
     from app.config.settings import settings
-    MODEL_PATH = getattr(settings, "YOLO_MODEL_PATH", "models/best.pt")
+    MODEL_PATH = getattr(settings, "YOLO_MODEL_PATH", "models/new_best.pt")
     CAMERA_INDEX = 1
     CONF_THRESHOLD = 0.5
 
@@ -125,37 +125,67 @@ class MonkeyDetector:
             highest_conf = 0.0
             primary_label = None
             primary_bbox = []
+            monkey_detected = False
 
             for result in results:
-                boxes = result.boxes
-                for box in boxes:
-                    conf = float(box.conf[0]) * 100.0
-                    cls_id = int(box.cls[0])
-                    class_name = self.model.names.get(cls_id, f"class_{cls_id}")
-                    bbox = [float(x) for x in box.xyxy[0].tolist()]
+                boxes = getattr(result, "boxes", None)
+                if boxes is not None and len(boxes) > 0:
+                    for box in boxes:
+                        conf = float(box.conf[0]) * 100.0
+                        cls_id = int(box.cls[0])
+                        class_name = self.model.names.get(cls_id, f"class_{cls_id}")
+                        bbox = [float(x) for x in box.xyxy[0].tolist()]
+
+                        cname_clean = str(class_name).lower().strip().replace("-", " ")
+                        is_neg = any(neg in cname_clean for neg in ["not", "non", "no_", "human", "person", "background"])
+                        is_monkey = ("monkey" in cname_clean and not is_neg)
+
+                        detection_item = {
+                            "class_name": class_name,
+                            "confidence": round(conf, 2),
+                            "bounding_box": [round(b, 2) for b in bbox],
+                            "is_monkey": is_monkey
+                        }
+                        all_detections.append(detection_item)
+
+                        if is_monkey and conf > highest_conf:
+                            highest_conf = conf
+                            primary_label = class_name
+                            primary_bbox = [round(b, 2) for b in bbox]
+                            monkey_detected = True
+
+                elif getattr(result, "probs", None) is not None:
+                    probs = result.probs
+                    top1_id = int(probs.top1)
+                    top1_conf = float(probs.top1conf.item()) * 100.0
+                    class_name = self.model.names.get(top1_id, f"class_{top1_id}")
+
+                    cname_clean = str(class_name).lower().strip().replace("-", " ")
+                    is_neg = any(neg in cname_clean for neg in ["not", "non", "no_", "human", "person", "background"])
+                    is_monkey = ("monkey" in cname_clean and not is_neg)
 
                     detection_item = {
                         "class_name": class_name,
-                        "confidence": round(conf, 2),
-                        "bounding_box": [round(b, 2) for b in bbox]
+                        "confidence": round(top1_conf, 2),
+                        "bounding_box": [],
+                        "is_monkey": is_monkey
                     }
                     all_detections.append(detection_item)
 
-                    if conf > highest_conf:
-                        highest_conf = conf
+                    if is_monkey and (top1_conf / 100.0) >= self.conf_threshold:
+                        highest_conf = top1_conf
                         primary_label = class_name
-                        primary_bbox = [round(b, 2) for b in bbox]
-
-            is_detected = len(all_detections) > 0
+                        primary_bbox = []
+                        monkey_detected = True
 
             return {
-                "detected": is_detected,
-                "animal": primary_label or ("Monkey" if is_detected else None),
+                "detected": monkey_detected,
+                "animal": primary_label if monkey_detected else None,
                 "confidence": round(highest_conf, 2),
                 "bounding_box": primary_bbox,
                 "image_path": None,
                 "timestamp": timestamp,
-                "detections_count": len(all_detections),
+                "detections_count": len([d for d in all_detections if d.get("is_monkey")]),
                 "all_detections": all_detections
             }
         except Exception as e:

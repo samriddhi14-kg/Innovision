@@ -166,7 +166,7 @@ while True:
     results = model(frame, verbose=False)
 
     # Extract results
-    detections = results[0].boxes
+    detections = results[0].boxes if (results and results[0].boxes is not None) else []
 
     # Initialize variable for basic object counting example
     object_count = 0

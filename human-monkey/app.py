@@ -208,36 +208,86 @@ def stop_alert_sound() -> None:
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 DEFAULT_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
 
+# Telegram server IPs (bypasses ISP DNS blocking — these are Telegram's official DC IPs)
+# If api.telegram.org DNS fails, we retry with direct IP via custom DNS resolution override.
+_TELEGRAM_IP_OVERRIDES = [
+    "149.154.167.220",  # DC4 (most reliable for South/Southeast Asia)
+    "149.154.166.110",  # DC2
+    "149.154.167.50",   # DC1
+    "91.108.4.136",     # DC4 alt
+]
+
+def _make_telegram_session() -> "requests.Session":
+    """Create a requests Session that overrides api.telegram.org DNS to Telegram's IPs."""
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.poolmanager import PoolManager
+    from urllib3.util.url import parse_url
+    import socket
+
+    class TelegramDNSAdapter(HTTPAdapter):
+        """HTTP adapter that resolves api.telegram.org to Telegram's known IPs."""
+        def __init__(self, ip_overrides, **kwargs):
+            self._ip_overrides = ip_overrides
+            super().__init__(**kwargs)
+
+        def send(self, request, **kwargs):
+            # Try each IP until one works
+            last_exc = None
+            for ip in self._ip_overrides:
+                try:
+                    # Monkey-patch socket.getaddrinfo for this thread temporarily
+                    _original_getaddrinfo = socket.getaddrinfo
+                    def _patched_getaddrinfo(host, port, *args, **kw):
+                        if host == "api.telegram.org":
+                            return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', (ip, port))]
+                        return _original_getaddrinfo(host, port, *args, **kw)
+                    socket.getaddrinfo = _patched_getaddrinfo
+                    try:
+                        resp = super().send(request, **kwargs)
+                        return resp
+                    finally:
+                        socket.getaddrinfo = _original_getaddrinfo
+                except Exception as e:
+                    last_exc = e
+                    continue
+            raise last_exc
+
+    session = requests.Session()
+    session.mount("https://api.telegram.org", TelegramDNSAdapter(_TELEGRAM_IP_OVERRIDES))
+    return session
+
 def send_telegram_alert(chat_id: str, cam_id: int, confidence: float, image_bytes: Optional[bytes] = None) -> None:
     """Send a Telegram alert (text + optional photo) to a specific chat ID.
     Args:
         chat_id: Telegram chat identifier (e.g., user or group ID).
         cam_id: Camera identifier.
-        confidence: Detection confidence (0‑1).
+        confidence: Detection confidence (0-1).
         image_bytes: JPEG bytes of the snapshot (optional).
     """
     if not TELEGRAM_BOT_TOKEN:
-        log_msg(f"[Telegram] No BOT_TOKEN – simulated alert to {chat_id} (Camera {cam_id})")
+        log_msg(f"[Telegram] No BOT_TOKEN - simulated alert to {chat_id} (Camera {cam_id})")
         return
 
     caption = (
-        f"🚨 *khetRakshak MONKEY ALERT!* 🐒\n"
-        f"\n📷 *Camera:* Camera 0{cam_id}\n"
-        f"🎯 *Confidence:* {round(confidence * 100, 1)}%\n"
-        f"⏰ *Time:* {datetime.datetime.now().strftime('%I:%M %p')}\n"
-        f"📍 *Location:* Protected Farm Area"
+        f"\U0001f6a8 *khetRakshak MONKEY ALERT!* \U0001f412\n"
+        f"\n\U0001f4f7 *Camera:* Camera 0{cam_id}\n"
+        f"\U0001f3af *Confidence:* {round(confidence * 100, 1)}%\n"
+        f"\u23f0 *Time:* {datetime.datetime.now().strftime('%I:%M %p')}\n"
+        f"\U0001f4cd *Location:* Protected Farm Area"
     )
     try:
         import requests
+        session = _make_telegram_session()
         if image_bytes:
             url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
             files = {"photo": ("monkey.jpg", image_bytes, "image/jpeg")}
             data = {"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}
-            resp = requests.post(url, data=data, files=files, timeout=10)
+            resp = session.post(url, data=data, files=files, timeout=15)
         else:
             url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
             data = {"chat_id": chat_id, "text": caption, "parse_mode": "Markdown"}
-            resp = requests.post(url, json=data, timeout=10)
+            resp = session.post(url, json=data, timeout=15)
         if resp.status_code == 200:
             log_msg(f"[Telegram] Sent alert to {chat_id} (Camera {cam_id})")
         else:
@@ -522,42 +572,39 @@ class DetectionThread(threading.Thread):
                     log_msg(f"[Cam {self.cam_id}] MONKEY ALERT CONFIRMED (Conf={best_monkey_conf:.2f})")
                     send_arduino(b"1", "MONKEY DETECTED")
                     play_alert_sound()
-                    # ── Telegram Alert & Supabase Logging (rate-limited per camera) ──
+                    # Immediate Telegram alert (subject to cooldown)
+                    now = time.time()
+                    # Capture current frame as JPEG for Telegram photo
+                    image_bytes = None
+                    with _frame_locks[self.cam_id]:
+                        current_frame = latest_frames[self.cam_id]
+                        if current_frame is not None:
+                            success, encoded_img = cv2.imencode('.jpg', current_frame)
+                            if success:
+                                image_bytes = encoded_img.tobytes()
+                    # Prepare chat list
+                    with _phone_lock:
+                        chats = list(camera_phones.get(self.cam_id, []))
+                        if not chats and DEFAULT_CHAT_ID:
+                            chats = [DEFAULT_CHAT_ID]
+                    if chats and (now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS):
+                        last_sms_time[self.cam_id] = now
+                        for chat_id in chats:
+                            threading.Thread(
+                                target=send_telegram_alert,
+                                args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
+                                daemon=True
+                            ).start()
+                    # Supabase logging (only on debounced alert)
                     if debounced_alert:
-                        now = time.time()
                         det_time_str = datetime.datetime.now().strftime("Today, %I:%M %p")
                         last_detection_times[self.cam_id] = det_time_str
-                        
-                        # Capture current frame as JPEG for Telegram photo & Supabase snapshot
-                        image_bytes = None
-                        with _frame_locks[self.cam_id]:
-                            current_frame = latest_frames[self.cam_id]
-                            if current_frame is not None:
-                                success, encoded_img = cv2.imencode('.jpg', current_frame)
-                                if success:
-                                    image_bytes = encoded_img.tobytes()
-
-                        # 1. Log detection to Supabase DB asynchronously
+                        # Log detection to Supabase DB asynchronously
                         threading.Thread(
                             target=record_detection_supabase,
                             args=(self.cam_id, best_monkey_conf, image_bytes),
                             daemon=True
                         ).start()
-
-                        # 2. Dispatch Telegram alert (with cooldown)
-                        with _phone_lock:
-                            chats = list(camera_phones.get(self.cam_id, []))
-                            if not chats and DEFAULT_CHAT_ID:
-                                chats = [DEFAULT_CHAT_ID]
-
-                        if chats and (now - last_sms_time[self.cam_id] >= SMS_COOLDOWN_SECONDS):
-                            last_sms_time[self.cam_id] = now
-                            for chat_id in chats:
-                                threading.Thread(
-                                    target=send_telegram_alert,
-                                    args=(chat_id, self.cam_id, best_monkey_conf, image_bytes),
-                                    daemon=True
-                                ).start()
                 else:
                     if monkey_detected_in_frame:
                         log_msg(f"[Cam {self.cam_id}] Monkey seen (Debouncing count={consecutive_monkey_count}/{DEBOUNCE_FRAMES})")

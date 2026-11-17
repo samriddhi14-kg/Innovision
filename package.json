@@ -5,11 +5,14 @@
   "description": "Innovision with Supabase authentication",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "start": "concurrently --kill-others --names \"FLASK,VITE\" --prefix-colors \"yellow,cyan\" \"cd human-monkey && .venv\\\\Scripts\\\\python app.py\" \"vite --host 0.0.0.0\"",
-    "start:flask": "cd human-monkey && .venv\\Scripts\\python app.py",
+    "dev": "concurrently --kill-others --names \"FLASK,VITE\" --prefix-colors \"yellow,cyan\" \"cd human-monkey && ..\\.venv\\\\Scripts\\\\python app.py\" \"vite --host 0.0.0.0\"",
+    "start": "concurrently --kill-others --names \"FLASK,VITE\" --prefix-colors \"yellow,cyan\" \"cd human-monkey && ..\\.venv\\\\Scripts\\\\python app.py\" \"vite --host 0.0.0.0\"",
+    "run": "concurrently --kill-others --names \"FLASK,VITE\" --prefix-colors \"yellow,cyan\" \"cd human-monkey && ..\\.venv\\\\Scripts\\\\python app.py\" \"vite --host 0.0.0.0\"",
+    "start:flask": "cd human-monkey && ..\\.venv\\Scripts\\python app.py",
     "start:vite": "vite --host 0.0.0.0",
+    "dev:flask": "cd human-monkey && ..\\.venv\\Scripts\\python app.py",
+    "dev:vite": "vite --host 0.0.0.0",
+    "build": "vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
